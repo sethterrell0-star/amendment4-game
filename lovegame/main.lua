@@ -2,7 +2,7 @@ local CASES = require("case_data")
 local W, H = 1280, 720
 local screen, caseOrder, casePos = "title", {}, 1
 local stagePos, score, answered, selected = 1, 0, false, 1
-local feedback, feedbackGood, best, caseCorrect = "", false, 0, 0
+local feedback, feedbackGood, caseCorrect = "", false, 0
 local current, fonts, art, photos = nil, {}, {}, {}
 local scale, ox, oy = 1, 0, 0
 local colors = {
@@ -50,7 +50,6 @@ local function nextCase()
   casePos=casePos+1
   if casePos>#caseOrder then
     screen="results"
-    if score>best then best=score; pcall(love.filesystem.write,"best.txt",tostring(best)) end
   else current=CASES[caseOrder[casePos]]; stagePos=1; caseCorrect=0; screen="intro" end
 end
 local function finishAnswer(index)
@@ -196,7 +195,7 @@ local function drawResults()
   local rank=score>=21 and "ACE COUNSEL" or (score>=15 and "SHARP ADVOCATE" or (score>=8 and "COUNSEL IN TRAINING" or "BACK TO THE BOOKS"))
   text(rank,352,380,fonts.head,colors.red,"center",576)
   text("Every case can turn on one small fact. Review the doctrine,\nquestion the search, and keep the remedy precise.",384,442,fonts.small,colors.ink,"center",512)
-  text("PERSONAL BEST  "..best.." / 24",352,501,fonts.tiny,colors.blue,"center",576)
+  text("EACH CASE IS WORTH 3 POINTS",352,501,fonts.tiny,colors.blue,"center",576)
   rounded(482,536,316,53,10,colors.gold); text("PLAY ANOTHER DOCKET",482,551,fonts.small,colors.navy,"center",316)
   center("Enter to play again     ·     Esc for title",624,fonts.tiny,colors.cream)
 end
@@ -210,10 +209,6 @@ local function advance()
 end
 function love.load()
   love.graphics.setDefaultFilter("linear","linear",1); love.math.setRandomSeed(os.time()); loadFonts(); loadArt()
-  if love.filesystem.getInfo("best.txt","file") then
-    local data=love.filesystem.read("best.txt")
-    if data then best=tonumber(data) or 0 end
-  end
   local w,h=love.graphics.getDimensions(); love.resize(w,h)
 end
 function love.resize(w,h)
