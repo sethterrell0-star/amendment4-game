@@ -210,7 +210,10 @@ local function advance()
 end
 function love.load()
   love.graphics.setDefaultFilter("linear","linear",1); love.math.setRandomSeed(os.time()); loadFonts(); loadArt()
-  local ok,data=pcall(love.filesystem.read,"best.txt"); if ok and data then best=tonumber(data) or 0 end
+  if love.filesystem.getInfo("best.txt","file") then
+    local data=love.filesystem.read("best.txt")
+    if data then best=tonumber(data) or 0 end
+  end
   local w,h=love.graphics.getDimensions(); love.resize(w,h)
 end
 function love.resize(w,h)
