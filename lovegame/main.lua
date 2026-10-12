@@ -85,7 +85,9 @@ local function drawBackdrop(kind)
   end
 end
 local function drawTop(label)
-  rounded(28,20,262,42,8,colors.red); text(label,42,29,fonts.small,colors.white)
+  rounded(28,20,262,42,8,colors.red)
+  local labelFont=#label>24 and fonts.tiny or fonts.small
+  text(label,42,31,labelFont,colors.white,"left",234)
   text("FOURTH COUNSEL",W-294,29,fonts.small,colors.gold,"right",260)
   love.graphics.setLineWidth(2); set(colors.white,.22); love.graphics.line(28,73,W-28,73)
 end
@@ -209,6 +211,7 @@ end
 function love.load()
   love.graphics.setDefaultFilter("linear","linear",1); love.math.setRandomSeed(os.time()); loadFonts(); loadArt()
   local ok,data=pcall(love.filesystem.read,"best.txt"); if ok and data then best=tonumber(data) or 0 end
+  local w,h=love.graphics.getDimensions(); love.resize(w,h)
 end
 function love.resize(w,h)
   scale=math.min(w/W,h/H); ox=(w-W*scale)/2; oy=(h-H*scale)/2
@@ -237,10 +240,13 @@ function love.mousepressed(mx,my,button)
   local x,y=(mx-ox)/scale,(my-oy)/scale
   if screen=="title" then beginGame()
   elseif screen=="intro" then startCase()
-  elseif screen=="ruling" then nextAfterRuling()
-  elseif screen=="results" then beginGame()
+  elseif screen=="ruling" then
+    if x>=657 and x<=907 and y>=648 and y<=696 then nextAfterRuling() end
+  elseif screen=="results" then
+    if x>=482 and x<=798 and y>=536 and y<=589 then beginGame() end
   elseif screen=="play" then
-    if answered then finishAnswer(selected)
+    if answered then
+      if x>=1080 and x<=1246 and y>=17 and y<=60 then finishAnswer(selected) end
     else for i=1,3 do local ax,ay,aw,ah=answerRect(i); if x>=ax and x<=ax+aw and y>=ay and y<=ay+ah then finishAnswer(i); return end end end
   end
 end

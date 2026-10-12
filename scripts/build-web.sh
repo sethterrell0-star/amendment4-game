@@ -21,4 +21,7 @@ footer p { margin: 0; }
 footer a, footer a:link, footer a:visited { color: #f7c944; }
 footer button { color: #10162a; background: #f7c944; border: 0; border-radius: 5px; padding: 5px 10px; cursor: pointer; }
 @media (max-aspect-ratio: 1/1) { #canvas, #loadingCanvas { width: 100vw; max-height: calc(100vh - 72px); } }
+@media (orientation: portrait) and (max-width: 800px) {
+  body::before { content: "Rotate your device to landscape to play"; position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; padding: 32px; color: #fdf4d3; background: #090d1a; font: bold 24px Arial, sans-serif; }
+}
 CSS
