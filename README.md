@@ -2,7 +2,7 @@
 
 A courtroom visual novel about the Fourth Amendment. Each docket has eight randomized fictional cases with three choices in each hearing: identify the key fact, apply the rule, and ask for a focused remedy. Some searches are lawful. The player argues both sides of the line, then sees the court's ruling and the doctrine behind it.
 
-The game is written in **LÖVE 11.5 / Lua**. It also ships as a static browser build using love.js and WebAssembly. No server code or runtime network requests are needed.
+The game is written in **LÖVE 11.4 / Lua**. It also ships as a static browser build using love.js and WebAssembly. No server code or runtime network requests are needed.
 
 ## Play in a browser
 
@@ -16,7 +16,7 @@ Then visit `http://localhost:8000`. The build in `docs/` is ready for GitHub Pag
 
 ## Play with LÖVE
 
-Install [LÖVE 11.5](https://love2d.org/) and run the project folder:
+Install [LÖVE](https://love2d.org/) and run the project folder:
 
 ```sh
 love lovegame
