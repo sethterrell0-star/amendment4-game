@@ -1,9 +1,12 @@
 local CASES = require("case_data")
 local W, H = 1280, 720
+local DIFFICULTIES = {"FOUNDATIONS", "APPLICATION", "ADVANCED", "EXPERT"}
+local TOTAL_QUESTIONS = 0
+for _, case in ipairs(CASES) do TOTAL_QUESTIONS = TOTAL_QUESTIONS + #case.questions end
 local screen, caseOrder, casePos = "title", {}, 1
 local stagePos, score, answered, selected = 1, 0, false, 1
 local feedback, feedbackGood, caseCorrect = "", false, 0
-local current, fonts, art, photos = nil, {}, {}, {}
+local current, questionDeck, fonts, art, photos = nil, {}, {}, {}, {}
 local scale, ox, oy = 1, 0, 0
 local colors = {
   ink={.055,.075,.13}, navy={.075,.12,.24}, blue={.12,.35,.82}, cyan={.17,.79,.9},
@@ -36,15 +39,38 @@ local function loadFonts()
   fonts.tiny=love.graphics.newFont(13); fonts.small=love.graphics.newFont(17); fonts.body=love.graphics.newFont(20)
   fonts.mid=love.graphics.newFont(26); fonts.head=love.graphics.newFont(38); fonts.big=love.graphics.newFont(62); fonts.huge=love.graphics.newFont(84)
 end
-local function shuffle()
-  caseOrder={}; for i=1,#CASES do caseOrder[i]=i end
-  for i=#caseOrder,2,-1 do local j=love.math.random(i); caseOrder[i],caseOrder[j]=caseOrder[j],caseOrder[i] end
+local function shuffleList(items)
+  for i=#items,2,-1 do local j=love.math.random(i); items[i],items[j]=items[j],items[i] end
+  return items
+end
+local function buildDocket()
+  caseOrder={}
+  -- Difficulty always rises; case order is shuffled inside each band.
+  for tier=1,#DIFFICULTIES do
+    local band={}
+    for i,case in ipairs(CASES) do if case.tier==tier then band[#band+1]=i end end
+    shuffleList(band)
+    for _,index in ipairs(band) do caseOrder[#caseOrder+1]=index end
+  end
+end
+local function buildQuestionDeck(case)
+  questionDeck={}
+  for _,source in ipairs(case.questions) do
+    local question={prompt=source.prompt,choices={},correct=0}
+    local optionOrder={1,2,3}; shuffleList(optionOrder)
+    for slot,sourceIndex in ipairs(optionOrder) do
+      question.choices[slot]=source.choices[sourceIndex]
+      if sourceIndex==source.correct then question.correct=slot end
+    end
+    questionDeck[#questionDeck+1]=question
+  end
+  shuffleList(questionDeck)
 end
 local function beginGame()
-  shuffle(); casePos=1; stagePos=1; score=0; caseCorrect=0; screen="intro"; current=CASES[caseOrder[casePos]]
+  buildDocket(); casePos=1; stagePos=1; score=0; caseCorrect=0; screen="intro"; current=CASES[caseOrder[casePos]]
 end
 local function startCase()
-  current=CASES[caseOrder[casePos]]; stagePos=1; caseCorrect=0; answered=false; selected=1; screen="play"
+  current=CASES[caseOrder[casePos]]; buildQuestionDeck(current); stagePos=1; caseCorrect=0; answered=false; selected=1; feedback=""; screen="play"
 end
 local function nextCase()
   casePos=casePos+1
@@ -54,11 +80,11 @@ local function nextCase()
 end
 local function finishAnswer(index)
   if answered then
-    if stagePos<#current.stages then stagePos=stagePos+1; answered=false; selected=1; feedback=""; screen="play"
+    if stagePos<#questionDeck then stagePos=stagePos+1; answered=false; selected=1; feedback=""; screen="play"
     else screen="ruling" end
     return
   end
-  local stage=current.stages[stagePos]; selected=index
+  local stage=questionDeck[stagePos]; selected=index
   feedbackGood=index==stage.correct
   if feedbackGood then score=score+1; caseCorrect=caseCorrect+1 end
   feedback=stage.choices[index].why; answered=true
@@ -108,17 +134,18 @@ local function drawTitle()
   set(colors.gold); love.graphics.circle("fill",640,300,68)
   text("§",602,244,fonts.huge,colors.navy)
   drawLogo(112)
-  rounded(386,486,508,64,13,colors.red); text("START YOUR FIRST CASE",386,502,fonts.mid,colors.white,"center",508)
-  center("8 surprise cases  •  3 courtroom calls each  •  24 points possible",580,fonts.small,colors.cream)
+  rounded(386,486,508,64,13,colors.red); text("START THE DOCKET",386,502,fonts.mid,colors.white,"center",508)
+  center("12 randomized levels  •  4 difficulty bands  •  48 courtroom calls",580,fonts.small,colors.cream)
   center("Click / Enter to continue     ·     1–3 choose answers     ·     Esc returns to title",614,fonts.tiny,colors.muted)
 end
 local function drawIntro()
-  drawBackdrop("intro"); drawTop("CASE FILE  /  "..casePos.." OF "..#caseOrder)
+  drawBackdrop("intro"); drawTop("LEVEL  "..casePos.." / "..#caseOrder.."  •  "..DIFFICULTIES[current.tier])
   drawCharacter("witness-one",24,108,330,492,.91)
   rounded(298,114,930,498,18,colors.paper)
   rounded(298,114,930,52,18,colors.red); love.graphics.rectangle("fill",298,140,930,26); text(current.tag,322,129,fonts.small,colors.white)
   text(current.title,332,187,fonts.head,colors.ink,"left",850)
   text(current.setting,334,235,fonts.small,colors.blue,"left",840)
+  text("DIFFICULTY  /  "..DIFFICULTIES[current.tier],334,258,fonts.small,colors.red,"left",840)
   text("THE FACTS",334,278,fonts.small,colors.red)
   text(current.facts,334,305,fonts.body,colors.ink,"left",844)
   rounded(332,422,846,1,1,{.83,.84,.82})
@@ -130,7 +157,7 @@ local function drawIntro()
 end
 local function answerRect(i) return 100, 458+(i-1)*59, 1080, 50 end
 local function drawCourt()
-  drawBackdrop("court"); drawTop("TRIAL  "..casePos.." / "..#caseOrder.."     •     QUESTION "..stagePos.." / 3")
+  drawBackdrop("court"); drawTop("LEVEL "..casePos.." / "..#caseOrder.."  •  Q "..stagePos.." / "..#questionDeck)
   -- courtroom bar and two opponents
   set(colors.gold); love.graphics.rectangle("fill",0,346,W,6)
   set(colors.ink); love.graphics.rectangle("fill",0,352,W,114)
@@ -143,7 +170,7 @@ local function drawCourt()
   rounded(880,82,366,44,8,colors.red); text("PROSECUTION  /  OPPOSING COUNSEL",896,93,fonts.tiny,colors.white)
   rounded(72,365,1135,343,17,colors.paper)
   rounded(72,365,1135,52,16,colors.navy); love.graphics.rectangle("fill",72,398,1135,19)
-  local stage=current.stages[stagePos]
+  local stage=questionDeck[stagePos]
   text("THE COURT WANTS YOUR THEORY",98,399,fonts.small,colors.gold)
   text(stage.prompt,100,422,fonts.body,colors.ink,"left",1070)
   for i,ch in ipairs(stage.choices) do
@@ -160,25 +187,25 @@ local function drawCourt()
     rounded(108,636,1065,61,9,feedbackGood and colors.green or colors.red)
     local label=(feedbackGood and "OBJECTION SUSTAINED!  " or "OBJECTION OVERRULED.  ")..feedback
     text(label,126,645,fonts.tiny,colors.white,"left",1030)
-    rounded(1080,17,166,43,8,colors.gold); text(stagePos==3 and "SEE RULING →" or "CONTINUE →",1080,28,fonts.tiny,colors.navy,"center",166)
+    rounded(1080,17,166,43,8,colors.gold); text(stagePos==#questionDeck and "SEE RULING →" or "CONTINUE →",1080,28,fonts.tiny,colors.navy,"center",166)
   else
     text("Choose a response",101,667,fonts.tiny,colors.muted)
   end
 end
 local function drawRuling()
   drawBackdrop("court"); drawTop("THE COURT HAS RULED")
-  drawCharacter(caseCorrect==3 and "counsel-shout" or "counsel-surprised",8,104,455,590,.94)
-  local good=caseCorrect==3
+  drawCharacter(caseCorrect==#questionDeck and "counsel-shout" or "counsel-surprised",8,104,455,590,.94)
+  local good=caseCorrect==#questionDeck
   rounded(350,132,858,496,18,colors.paper)
   rounded(350,132,858,78,14,good and colors.green or colors.red)
   love.graphics.rectangle("fill",350,180,858,30)
   text(good and "PERFECT ARGUMENT!" or "CASE DECIDED",384,147,fonts.head,colors.white)
   text(current.title,390,231,fonts.mid,colors.ink,"left",770)
   text("YOUR PERFORMANCE",390,280,fonts.small,colors.blue)
-  for i=1,3 do
+  for i=1,#questionDeck do
     local x=392+(i-1)*71; rounded(x,319,54,14,7,i<=caseCorrect and colors.gold or {.79,.81,.81})
   end
-  text(caseCorrect.." / 3 sound calls",390,344,fonts.small,colors.ink)
+  text(caseCorrect.." / "..#questionDeck.." sound calls",390,344,fonts.small,colors.ink)
   rounded(386,391,782,1,1,{.82,.83,.81})
   text("THE RULING",390,413,fonts.small,colors.red)
   text(current.outcome,390,445,fonts.mid,colors.ink,"left",740)
@@ -191,11 +218,11 @@ local function drawResults()
   rounded(322,105,636,92,18,colors.red); love.graphics.rectangle("fill",322,167,636,30)
   text("TRIAL COMPLETE",352,123,fonts.head,colors.white,"center",576)
   text("YOUR FINAL SCORE",352,229,fonts.small,colors.blue,"center",576)
-  text(score.."  /  24",352,272,fonts.huge,colors.ink,"center",576)
-  local rank=score>=21 and "ACE COUNSEL" or (score>=15 and "SHARP ADVOCATE" or (score>=8 and "COUNSEL IN TRAINING" or "BACK TO THE BOOKS"))
+  text(score.."  /  "..TOTAL_QUESTIONS,352,272,fonts.huge,colors.ink,"center",576)
+  local rank=score>=math.ceil(TOTAL_QUESTIONS*.9) and "ACE COUNSEL" or (score>=math.ceil(TOTAL_QUESTIONS*.7) and "SHARP ADVOCATE" or (score>=math.ceil(TOTAL_QUESTIONS*.45) and "COUNSEL IN TRAINING" or "BACK TO THE BOOKS"))
   text(rank,352,380,fonts.head,colors.red,"center",576)
   text("Every case can turn on one small fact. Review the doctrine,\nquestion the search, and keep the remedy precise.",384,442,fonts.small,colors.ink,"center",512)
-  text("EACH CASE IS WORTH 3 POINTS",352,501,fonts.tiny,colors.blue,"center",576)
+  text("QUESTION AND ANSWER ORDER SHUFFLED EACH DOCKET",352,501,fonts.tiny,colors.blue,"center",576)
   rounded(482,536,316,53,10,colors.gold); text("PLAY ANOTHER DOCKET",482,551,fonts.small,colors.navy,"center",316)
   center("Enter to play again     ·     Esc for title",624,fonts.tiny,colors.cream)
 end
