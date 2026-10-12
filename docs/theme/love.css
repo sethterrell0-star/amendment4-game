@@ -1,0 +1,61 @@
+* {
+    box-sizing: border-box;
+}
+
+h1 {
+    font-family: arial;
+    color: rgb( 11, 86, 117 );
+}
+
+body {
+    background-image: url(bg.png);
+    background-repeat: no-repeat;
+    font-family: arial;
+    margin: 0;
+    padding: none;
+    background-color: rgb( 154, 205, 237 );
+    color: rgb( 28, 78, 104 );
+}
+
+footer {
+    font-family: arial;
+    font-size: 12px;
+    padding-left: 10px;
+    position:absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+/* Links */
+a {
+    text-decoration: none;
+}
+a:link {
+    color: rgb( 233, 73, 154 );
+}
+a:visited {
+    color: rgb( 110, 30, 71 );
+}
+a:hover {
+    color: rgb( 252, 207, 230 );
+}
+
+/* the canvas *must not* have any border or padding, or mouse coords will be wrong */
+#canvas {
+    padding-right: 0;
+    display: block;
+    border: 0px none;
+    visibility: hidden;
+}
+
+html, body { width: 100%; height: 100%; min-height: 100%; }
+body { overflow: hidden; background: #090d1a; color: #fdf4d3; text-align: center; }
+center { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+center > div { width: 100%; }
+h1 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+#canvas, #loadingCanvas { width: min(100vw, calc((100vh - 72px) * 1.7778)); height: auto; max-height: calc(100vh - 72px); margin: 0 auto; }
+footer { position: static; width: 100%; padding: 8px; color: #bac6e4; background: #090d1a; font-size: 12px; }
+footer p { margin: 0; }
+footer a, footer a:link, footer a:visited { color: #f7c944; }
+footer button { color: #10162a; background: #f7c944; border: 0; border-radius: 5px; padding: 5px 10px; cursor: pointer; }
+@media (max-aspect-ratio: 1/1) { #canvas, #loadingCanvas { width: 100vw; max-height: calc(100vh - 72px); } }
