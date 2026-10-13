@@ -4,7 +4,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 mkdir -p lovegame
 rm -f lovegame/fourth-counsel.love
-(cd lovegame && zip -qr fourth-counsel.love conf.lua main.lua case_data.lua assets)
+(cd lovegame && zip -qr fourth-counsel.love conf.lua main.lua case_data.lua custom_art.lua assets)
 rm -rf docs/* docs/.[!.]* docs/..?* 2>/dev/null || true
 npx love.js lovegame/fourth-counsel.love docs -c -t "Fourth Counsel"
 # Keep generated JavaScript diffs stable across love.js versions/platforms.

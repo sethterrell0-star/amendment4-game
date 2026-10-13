@@ -4,7 +4,7 @@ All art is bundled locally and can be replaced. No external image request is mad
 
 ## Characters
 
-The attorney, prosecutor, and witnesses are original box-figure graphics drawn in `lovegame/main.lua`. Faces, expressions, clothing, and detached hand gestures are assembled from LÖVE shapes; no portrait pack is bundled. Optional replacement PNGs can be added under `lovegame/assets/characters/custom/` with the pose names used by the game.
+The attorney, prosecutor, and witnesses are original box-figure graphics drawn in `lovegame/main.lua`. Faces, expressions, clothing, and detached hand gestures are assembled from LÖVE shapes; no portrait pack is bundled. Optional replacement PNGs go under `lovegame/assets/characters/custom/` and are enabled by adding pose-to-path pairs to `lovegame/custom_art.lua`.
 
 ## Background photos
 

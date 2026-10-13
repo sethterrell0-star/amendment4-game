@@ -58,14 +58,14 @@ local function loadArt()
     local imageOK,img=pcall(love.graphics.newImage,path)
     if imageOK and img then img:setFilter("linear","linear"); return img end
   end
-  -- Enumerate real override files instead of probing missing paths. This works
-  -- in both desktop LÖVE and love.js, whose missing-image errors are noisy.
-  local nameSet={}; for _,n in ipairs(names) do nameSet[n]=true end
-  local listOK,files=pcall(love.filesystem.getDirectoryItems,"assets/characters/custom")
-  if listOK and files then
-    for _,filename in ipairs(files) do
-      local pose=filename:match("^(.-)%.png$")
-      if pose and nameSet[pose] then art[pose]=loadImage("assets/characters/custom/"..filename) end
+  -- Overrides are opt-in through custom_art.lua. The default empty table keeps
+  -- the procedural cast independent of filesystem probing in love.js.
+  local customOK,overrides=pcall(require,"custom_art")
+  if customOK and type(overrides)=="table" then
+    for name,path in pairs(overrides) do
+      local allowed=false
+      for _,pose in ipairs(names) do if pose==name then allowed=true; break end end
+      if allowed and type(path)=="string" then art[name]=loadImage(path) end
     end
   end
   for _,n in ipairs({"courthouse","courtroom","police-car"}) do
