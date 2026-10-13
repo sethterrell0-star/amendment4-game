@@ -54,21 +54,22 @@ local function imageFit(img,x,y,w,h,alpha)
 end
 local function loadArt()
   local names={"counsel-neutral","counsel-shout","counsel-surprised","prosecutor-neutral","prosecutor-angry","prosecutor-surprised","witness-one","witness-one-doubt","witness-one-shocked","witness-two","witness-two-worry","witness-two-angry"}
-  local function loadImage(paths)
-    for _,path in ipairs(paths) do
-      local infoOK,info=pcall(love.filesystem.getInfo,path)
-      if infoOK and info then
-        local imageOK,img=pcall(love.graphics.newImage,path)
-        if imageOK and img then img:setFilter("linear","linear"); return img end
-      end
+  local function loadImage(path)
+    local imageOK,img=pcall(love.graphics.newImage,path)
+    if imageOK and img then img:setFilter("linear","linear"); return img end
+  end
+  -- Enumerate real override files instead of probing missing paths. This works
+  -- in both desktop LÖVE and love.js, whose missing-image errors are noisy.
+  local nameSet={}; for _,n in ipairs(names) do nameSet[n]=true end
+  local listOK,files=pcall(love.filesystem.getDirectoryItems,"assets/characters/custom")
+  if listOK and files then
+    for _,filename in ipairs(files) do
+      local pose=filename:match("^(.-)%.png$")
+      if pose and nameSet[pose] then art[pose]=loadImage("assets/characters/custom/"..filename) end
     end
   end
-  for _,n in ipairs(names) do
-    -- User PNG overrides are optional; the built-in box-figure cast is the default.
-    art[n]=loadImage({"assets/characters/custom/"..n..".png"})
-  end
   for _,n in ipairs({"courthouse","courtroom","police-car"}) do
-    photos[n]=loadImage({"assets/"..n..".jpg"})
+    photos[n]=loadImage("assets/"..n..".jpg")
   end
 end
 local function loadFonts()

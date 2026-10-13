@@ -9,6 +9,11 @@ rm -rf docs/* docs/.[!.]* docs/..?* 2>/dev/null || true
 npx love.js lovegame/fourth-counsel.love docs -c -t "Fourth Counsel"
 # Keep generated JavaScript diffs stable across love.js versions/platforms.
 sed -i 's/[[:space:]]*$//' docs/game.js
+sed -i 's/[[:space:]]*$//' docs/index.html
+# Cache-bust the loader and package URL whenever the bundled game changes.
+BUILD_ID="$(sed -n 's/.*"package_uuid":"\([^"]*\)".*/\1/p' docs/game.js | tail -1)"
+sed -i "s#src=\"game.js\"#src=\"game.js?v=${BUILD_ID}\"#" docs/index.html
+sed -i "s#REMOTE_PACKAGE_BASE = 'game.data';#REMOTE_PACKAGE_BASE = 'game.data?v=${BUILD_ID}';#" docs/game.js
 touch docs/.nojekyll
 cat >> docs/theme/love.css <<'CSS'
 
