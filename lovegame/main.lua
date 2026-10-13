@@ -358,7 +358,8 @@ local function drawLogo(y)
   set(colors.gold); love.graphics.polygon("fill",640,y+142,646,y+147,640,y+152,634,y+147)
   center("THE PEOPLE v. YOUR JUDGMENT",y+161,fonts.tiny,colors.muted)
 end
-local LEARN_VIEW_Y, LEARN_VIEW_H, LEARN_MAX_SCROLL = 99, 507, 892
+local LEARN_VIEW_Y, LEARN_VIEW_H, LEARN_CONTENT_H = 99, 507, 1650
+local LEARN_MAX_SCROLL = LEARN_CONTENT_H - (LEARN_VIEW_Y + LEARN_VIEW_H)
 local function drawLearnIllustration(kind,x,y,w,h)
   rounded(x,y,w,h,10,{.88,.86,.79})
   set({.80,.77,.69},.8); love.graphics.rectangle("line",x,y,w,h,10)
@@ -481,10 +482,14 @@ local function drawLearn()
   text("EXPLORE THE PRIMARY SOURCES",118,1412,fonts.tiny,colors.red)
   text("National Archives: Bill of Rights and ratification history   |   U.S. Reports: Verdugo-Urquidez   |   Riley v. California   |   Carpenter v. United States   |   Congress.gov Constitution Annotated",118,1438,fonts.tiny,colors.ink,"left",1027)
 
+  rounded(96,1518,1084,124,10,{.12,.17,.21})
+  text("RESEARCH AND CODING NOTE",118,1533,fonts.tiny,colors.gold)
+  text("I conducted the research for this game. A locally run AI tool helped write most of the code. Running it on my computer instead of in a remote data center reduced reliance on cloud AI computing and kept the coding prompts and project files local. That was a more resource-conscious and privacy-conscious choice for this project; local computing still uses electricity and hardware.",118,1558,fonts.tiny,colors.cream,"left",1027)
+
   love.graphics.pop(); love.graphics.setScissor()
   -- Scroll track and fixed footer controls.
   rounded(1188,LEARN_VIEW_Y,4,LEARN_VIEW_H,2,{.83,.81,.76})
-  local thumbH=math.max(48,LEARN_VIEW_H*LEARN_VIEW_H/(1498-LEARN_VIEW_Y))
+  local thumbH=math.max(48,LEARN_VIEW_H*LEARN_VIEW_H/(LEARN_CONTENT_H-LEARN_VIEW_Y))
   local thumbY=LEARN_VIEW_Y+(LEARN_VIEW_H-thumbH)*(learnScroll/LEARN_MAX_SCROLL)
   rounded(1186,thumbY,8,thumbH,4,colors.gold)
   divider(94,615,1092)
@@ -883,7 +888,7 @@ function love.mousepressed(mx,my,button)
     if x>=1040 and x<=1178 and y>=622 and y<=652 then screen="title"
     elseif x>=1178 and x<=1204 and y>=LEARN_VIEW_Y and y<=LEARN_VIEW_Y+LEARN_VIEW_H then
       learnDragging=true
-      local thumbH=math.max(48,LEARN_VIEW_H*LEARN_VIEW_H/(1498-LEARN_VIEW_Y))
+      local thumbH=math.max(48,LEARN_VIEW_H*LEARN_VIEW_H/(LEARN_CONTENT_H-LEARN_VIEW_Y))
       local trackRange=LEARN_VIEW_H-thumbH
       learnScroll=math.max(0,math.min(1,(y-LEARN_VIEW_Y-thumbH/2)/trackRange))*LEARN_MAX_SCROLL
     elseif x>=92 and x<=1180 and y>=LEARN_VIEW_Y and y<=LEARN_VIEW_Y+LEARN_VIEW_H then
@@ -922,7 +927,7 @@ end
 function love.mousemoved(mx,my)
   if screen=="learn" and learnDragging then
     local y=(my-oy)/scale
-    local thumbH=math.max(48,LEARN_VIEW_H*LEARN_VIEW_H/(1498-LEARN_VIEW_Y))
+    local thumbH=math.max(48,LEARN_VIEW_H*LEARN_VIEW_H/(LEARN_CONTENT_H-LEARN_VIEW_Y))
     local trackRange=LEARN_VIEW_H-thumbH
     learnScroll=math.max(0,math.min(1,(y-LEARN_VIEW_Y-thumbH/2)/trackRange))*LEARN_MAX_SCROLL
   end
