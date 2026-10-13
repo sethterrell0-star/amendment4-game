@@ -6,6 +6,7 @@ for _, case in ipairs(CASES) do TOTAL_QUESTIONS = TOTAL_QUESTIONS + #case.questi
 local screen, caseOrder, casePos = "title", {}, 1
 local stagePos, score, answered, selected = 1, 0, false, 1
 local feedback, feedbackGood, caseCorrect = "", false, 0
+local answerHistory = {}
 local current, questionDeck, fonts, art, photos = nil, {}, {}, {}, {}
 local runMode, difficultyMode, runMaxScore = "campaign", 2, TOTAL_QUESTIONS + #CASES
 local hintUsed, hintVisible, crossAnswered, crossCorrect = false, false, false, false
@@ -18,13 +19,24 @@ local scale, ox, oy = 1, 0, 0
 local DIFFICULTY_NAMES = {"STUDY", "STANDARD", "EXPERT"}
 local EVIDENCE_LABELS = {"CASE FILE", "ITEM AT ISSUE", "PRECEDENT"}
 local colors = {
-  ink={.055,.075,.13}, navy={.075,.12,.24}, blue={.12,.35,.82}, cyan={.17,.79,.9},
-  red={.91,.19,.22}, gold={1,.76,.19}, cream={1,.96,.82}, paper={1,.995,.94},
-  white={1,1,1}, muted={.68,.75,.88}, green={.24,.76,.48}, dark={.04,.05,.09}
+  ink={.10,.12,.15}, navy={.075,.105,.16}, blue={.20,.39,.48}, cyan={.42,.68,.67},
+  red={.58,.17,.19}, gold={.84,.68,.42}, cream={.94,.90,.80}, paper={.965,.95,.90},
+  white={1,1,1}, muted={.68,.72,.76}, green={.22,.51,.39}, dark={.035,.047,.067}
 }
 local function set(c,a) love.graphics.setColor(c[1],c[2],c[3],a or 1) end
 local function rounded(x,y,w,h,r,c)
   set(c); love.graphics.rectangle("fill",x,y,w,h,r or 8)
+end
+local function panel(x,y,w,h,r,fill,edge)
+  set({.018,.025,.04},.72); love.graphics.rectangle("fill",x+5,y+7,w,h,r or 8)
+  rounded(x,y,w,h,r,fill or colors.paper)
+  love.graphics.setLineWidth(1.5); set(edge or {.77,.72,.61},.85)
+  love.graphics.rectangle("line",x,y,w,h,r or 8)
+  set(colors.gold,.72); love.graphics.rectangle("fill",x+18,y+13,35,2,1)
+end
+local function divider(x,y,w,c)
+  set(c or {.77,.74,.68},.9); love.graphics.setLineWidth(1); love.graphics.line(x,y,x+w,y)
+  set(colors.white,.44); love.graphics.line(x,y+2,x+w,y+2)
 end
 local function text(s,x,y,font,c,align,limit)
   love.graphics.setFont(font); set(c or colors.ink)
@@ -46,7 +58,7 @@ local function loadArt()
 end
 local function loadFonts()
   fonts.tiny=love.graphics.newFont(13); fonts.small=love.graphics.newFont(17); fonts.body=love.graphics.newFont(20)
-  fonts.mid=love.graphics.newFont(26); fonts.head=love.graphics.newFont(38); fonts.big=love.graphics.newFont(62); fonts.huge=love.graphics.newFont(84)
+  fonts.choice=love.graphics.newFont(16); fonts.mid=love.graphics.newFont(26); fonts.head=love.graphics.newFont(38); fonts.big=love.graphics.newFont(62); fonts.huge=love.graphics.newFont(84)
 end
 local function shuffleList(items)
   for i=#items,2,-1 do local j=love.math.random(i); items[i],items[j]=items[j],items[i] end
@@ -101,6 +113,7 @@ local function evidenceText(index)
 end
 local function startCase()
   current=CASES[caseOrder[casePos]]; buildQuestionDeck(current); stagePos=1; caseCorrect=0
+  answerHistory={}
   answered=false; selected=1; feedback=""; hintUsed=false; hintVisible=false
   crossAnswered=false; crossCorrect=false; crossSelected=1; crossFeedback=""
   evidenceTab=1; evidenceViewed={false,false,false}; screen="investigation"
@@ -123,22 +136,27 @@ local function finishAnswer(index)
   end
   local stage=questionDeck[stagePos]; selected=index
   feedbackGood=index==stage.correct
+  answerHistory[stagePos]=feedbackGood
   if feedbackGood then score=score+1; caseCorrect=caseCorrect+1 end
   if hintUsed and difficultyMode==2 and feedbackGood then score=math.max(0,score-1); caseCorrect=caseCorrect-1 end
   feedback=stage.choices[index].why; answered=true
 end
 local function nextAfterRuling() nextCase() end
 local function drawBackdrop(kind)
-  love.graphics.clear(.035,.055,.11)
-  -- dramatic radial rays and halftone texture
-  set(colors.navy); love.graphics.rectangle("fill",0,0,W,H)
+  love.graphics.clear(colors.dark[1],colors.dark[2],colors.dark[3])
+  -- Quiet ink-to-slate gradient with a fine paper grain and restrained rays.
+  for i=0,24 do
+    local f=i/24
+    local c={colors.navy[1]+f*.025,colors.navy[2]+f*.035,colors.navy[3]+f*.045}
+    set(c); love.graphics.rectangle("fill",0,i*30,W,31)
+  end
   for i=1,22 do
     local x=(i*113)%W
-    set(i%2==0 and colors.blue or colors.cyan,.045)
+    set(i%2==0 and colors.blue or colors.cyan,.025)
     love.graphics.polygon("fill",640,315,x-28,0,x+80,0)
   end
-  set(colors.white,.055)
-  for y=12,350,18 do for x=(y%36),W,18 do love.graphics.circle("fill",x,y,1.4) end end
+  set(colors.white,.025)
+  for y=12,350,24 do for x=(y%48),W,24 do love.graphics.circle("fill",x,y,1) end end
   if kind=="court" and photos.courtroom then
     set(colors.white,.16); love.graphics.draw(photos.courtroom,0,0,0,W/photos.courtroom:getWidth(),H/photos.courtroom:getHeight())
     set(colors.navy,.72); love.graphics.rectangle("fill",0,0,W,H)
@@ -146,13 +164,13 @@ local function drawBackdrop(kind)
     set(colors.white,.23); love.graphics.draw(photos.courthouse,0,0,0,W/photos.courthouse:getWidth(),H/photos.courthouse:getHeight())
     set(colors.navy,.69); love.graphics.rectangle("fill",0,0,W,H)
   end
+  set(colors.gold,.16); love.graphics.rectangle("fill",0,0,W,3); love.graphics.rectangle("fill",0,H-3,W,3)
 end
 local function drawTop(label)
-  rounded(28,20,262,42,8,colors.red)
-  local labelFont=#label>24 and fonts.tiny or fonts.small
-  text(label,42,31,labelFont,colors.white,"left",234)
-  text("FOURTH COUNSEL",W-294,29,fonts.small,colors.gold,"right",260)
-  love.graphics.setLineWidth(2); set(colors.white,.22); love.graphics.line(28,73,W-28,73)
+  rounded(28,18,7,43,3,colors.gold)
+  text(label,48,25,#label>30 and fonts.tiny or fonts.small,colors.cream,"left",930)
+  text("FOURTH  /  COUNSEL",W-324,27,fonts.tiny,colors.gold,"right",294)
+  divider(28,73,W-56,{.64,.58,.46})
 end
 local function drawCharacter(name,x,y,w,h,alpha)
   if art[name] then imageFit(art[name],x,y,w,h,alpha); return end
@@ -276,65 +294,82 @@ local function drawCharacter(name,x,y,w,h,alpha)
 end
 local function drawLogo(y)
   center("FOURTH",y,fonts.huge,colors.cream)
-  center("COUNSEL",y+80,fonts.big,colors.gold)
-  love.graphics.setLineWidth(6); set(colors.red); love.graphics.line(392,y+151,888,y+151)
-  center("THE PEOPLE v. YOUR JUDGMENT",y+164,fonts.small,colors.white)
+  center("COUNSEL",y+74,fonts.big,colors.gold)
+  love.graphics.setLineWidth(2); set(colors.gold,.8); love.graphics.line(445,y+147,835,y+147)
+  set(colors.gold); love.graphics.polygon("fill",640,y+142,646,y+147,640,y+152,634,y+147)
+  center("THE PEOPLE v. YOUR JUDGMENT",y+161,fonts.tiny,colors.muted)
 end
 local function drawTitle()
   drawBackdrop("intro")
   drawCharacter("counsel-neutral",18,150,300,510,.96)
   drawCharacter("prosecutor-neutral",962,142,290,520,.94)
   drawLogo(55)
-  rounded(408,279,464,39,9,colors.navy); text("CHOOSE YOUR DOCKET",408,287,fonts.small,colors.gold,"center",464)
+  panel(365,257,550,397,15,{.085,.115,.17},{.65,.56,.40})
+  text("SELECT A DOCKET",405,275,fonts.small,colors.gold)
+  text("Choose how you want to take the case.",405,300,fonts.tiny,colors.muted)
   local entries={{"1  CAMPAIGN","Twelve escalating cases"},{"2  DAILY DOCKET","Same randomized docket worldwide"},{"3  PRACTICE","Choose a case and drill the rule"},{"4  DOCTRINE NOTEBOOK","Review cases, rules and outcomes"}}
   for i,e in ipairs(entries) do
-    local yy=328+(i-1)*67
-    rounded(399,yy,482,57,9,i==1 and colors.red or colors.paper)
-    text(e[1],418,yy+6,fonts.small,i==1 and colors.white or colors.ink)
-    text(e[2],418,yy+30,fonts.tiny,i==1 and colors.cream or colors.blue)
+    local yy=328+(i-1)*61
+    rounded(397,yy,486,53,8,{.94,.92,.86})
+    rounded(408,yy+8,36,36,6,colors.navy)
+    text(tostring(i),408,yy+15,fonts.tiny,colors.gold,"center",36)
+    text(e[1]:sub(4),458,yy+6,fonts.small,colors.ink)
+    text(e[2],458,yy+29,fonts.tiny,colors.blue)
+    text("›",850,yy+6,fonts.mid,colors.gold,"center",24)
   end
-  rounded(467,608,346,41,8,colors.gold)
-  text("DIFFICULTY  /  "..DIFFICULTY_NAMES[difficultyMode].."   (D to change)",467,619,fonts.tiny,colors.navy,"center",346)
-  center("1–4 select a mode • D changes difficulty • Esc returns here",674,fonts.tiny,colors.muted)
+  rounded(500,584,280,39,7,{.13,.16,.21})
+  text("DIFFICULTY  ·  "..DIFFICULTY_NAMES[difficultyMode],512,595,fonts.tiny,colors.cream,"center",256)
+  center("Press 1–4 to choose  ·  D changes difficulty",680,fonts.tiny,colors.muted)
 end
 local function drawIntro()
   drawBackdrop("intro"); drawTop("LEVEL  "..casePos.." / "..#caseOrder.."  •  "..DIFFICULTIES[current.tier])
-  drawCharacter("witness-one",24,108,330,492,.91)
-  rounded(298,114,930,498,18,colors.paper)
-  rounded(298,114,930,52,18,colors.red); love.graphics.rectangle("fill",298,140,930,26); text(current.tag,322,129,fonts.small,colors.white)
-  text(current.title,332,187,fonts.head,colors.ink,"left",850)
-  text(current.setting,334,235,fonts.small,colors.blue,"left",840)
-  text("DIFFICULTY  /  "..DIFFICULTIES[current.tier],334,258,fonts.small,colors.red,"left",840)
-  text("THE FACTS",334,278,fonts.small,colors.red)
-  text(current.facts,334,305,fonts.body,colors.ink,"left",844)
-  rounded(332,422,846,1,1,{.83,.84,.82})
-  text("EVIDENCE AT ISSUE",334,440,fonts.small,colors.red)
-  text(current.item,334,464,fonts.mid,colors.ink,"left",820)
-  text(difficultyMode==3 and "EXPERT MODE  /  doctrine notes hidden" or "Doctrine: "..current.doctrine,334,520,fonts.small,colors.blue,"left",825)
-  rounded(516,634,248,52,10,colors.gold); text("OPEN EVIDENCE DESK  →",516,646,fonts.tiny,colors.navy,"center",248)
-  text("Enter / click to inspect the case file",18,674,fonts.tiny,colors.muted)
+  drawCharacter(current.witness or "witness-one",18,127,320,485,.95)
+  panel(298,104,930,520,15,colors.paper,{.67,.58,.43})
+  rounded(298,104,930,7,4,colors.gold)
+  rounded(326,127,230,30,5,{.91,.88,.81})
+  text(current.tag,339,135,fonts.tiny,colors.red)
+  text("CASE  "..string.format("%02d",casePos),1154,135,fonts.tiny,colors.blue,"right",44)
+  text(current.title,328,175,fonts.head,colors.ink,"left",850)
+  text(current.setting,331,223,fonts.small,colors.blue,"left",830)
+  rounded(1017,218,178,30,6,{.91,.88,.81})
+  text(DIFFICULTIES[current.tier],1028,226,fonts.tiny,colors.red,"center",156)
+  divider(328,262,867)
+  text("THE FACTS",330,280,fonts.tiny,colors.red)
+  text(current.facts,330,306,fonts.body,colors.ink,"left",850)
+  divider(328,428,867)
+  text("EVIDENCE AT ISSUE",330,445,fonts.tiny,colors.red)
+  text(current.item,330,469,fonts.mid,colors.ink,"left",830)
+  text(difficultyMode==3 and "EXPERT MODE  /  DOCTRINE NOTES HIDDEN" or current.doctrine,330,519,fonts.tiny,colors.blue,"left",835)
+  rounded(920,562,275,43,7,colors.navy)
+  text("OPEN EVIDENCE DESK  →",932,575,fonts.tiny,colors.gold,"center",250)
+  text("ENTER OR CLICK  ·  REVIEW THE RECORD",18,674,fonts.tiny,colors.muted)
 end
 
 local function drawInvestigation()
   drawBackdrop("intro"); drawTop("INVESTIGATION  •  LEVEL "..casePos.." / "..#caseOrder)
-  rounded(80,100,1120,550,18,colors.paper)
-  text("THE EVIDENCE DESK",112,119,fonts.head,colors.ink)
-  text("Inspect all three records. The witness will challenge your reading of the file.",114,168,fonts.small,colors.blue)
+  panel(80,100,1120,550,14,colors.paper,{.67,.58,.43})
+  text("THE EVIDENCE DESK",112,117,fonts.head,colors.ink)
+  text("Review each record. Use the file to test the witness's account.",114,162,fonts.small,colors.blue)
+  divider(114,191,1020)
   for i,label in ipairs(EVIDENCE_LABELS) do
     local x=114+(i-1)*350
-    rounded(x,211,322,56,9,evidenceTab==i and colors.red or colors.navy)
-    text((evidenceViewed[i] and "✓  " or "")..label,x+8,228,fonts.small,colors.white,"center",306)
+    local fill=evidenceTab==i and colors.navy or {.90,.89,.84}
+    rounded(x,207,322,54,7,fill)
+    rounded(x,207,5,54,2,evidenceViewed[i] and colors.green or (evidenceTab==i and colors.gold or {.72,.69,.62}))
+    text((evidenceViewed[i] and "✓  " or string.format("%02d  ",i))..label,x+16,224,fonts.tiny,evidenceTab==i and colors.cream or colors.ink,"center",294)
   end
   local labels={"OFFICIAL CASE FILE","PROPERTY / RECORD REVIEW","CONTROLLING PRECEDENT"}
-  rounded(114,292,1020,258,12,{.91,.94,.95})
-  text(labels[evidenceTab],140,312,fonts.small,colors.red)
-  text(evidenceText(evidenceTab),142,350,fonts.mid,colors.ink,"left",950)
-  rounded(114,574,250,43,9,colors.gold); text("←  PREVIOUS",114,586,fonts.tiny,colors.navy,"center",250)
-  rounded(382,574,250,43,9,colors.gold); text("NEXT  →",382,586,fonts.tiny,colors.navy,"center",250)
+  panel(114,280,1020,265,10,{.925,.92,.86},{.82,.78,.68})
+  rounded(114,280,7,265,4,colors.gold)
+  text(labels[evidenceTab],144,302,fonts.tiny,colors.red)
+  divider(144,330,950)
+  text(evidenceText(evidenceTab),144,352,fonts.body,colors.ink,"left",948)
+  rounded(114,576,220,41,6,{.88,.86,.80}); text("←  PREVIOUS FILE",114,589,fonts.tiny,colors.navy,"center",220)
+  rounded(348,576,220,41,6,{.88,.86,.80}); text("NEXT FILE  →",348,589,fonts.tiny,colors.navy,"center",220)
   local ready=evidenceViewed[1] and evidenceViewed[2] and evidenceViewed[3]
-  rounded(847,574,287,43,9,ready and colors.green or {.60,.64,.68})
-  text(ready and "CALL THE WITNESS  →" or "REVIEW ALL THREE",847,586,fonts.tiny,colors.white,"center",287)
-  center("← / → switch files  •  Enter marks this file reviewed",626,fonts.tiny,colors.blue)
+  rounded(847,576,287,41,6,ready and colors.green or {.75,.75,.71})
+  text(ready and "CALL THE WITNESS  →" or "REVIEW ALL THREE FILES",847,589,fonts.tiny,colors.white,"center",287)
+  center("← / → change file   ·   Enter marks it reviewed",628,fonts.tiny,colors.blue)
 end
 
 local function drawCross()
@@ -345,16 +380,18 @@ local function drawCross()
     else witnessArt=witnessArt..(witnessArt=="witness-one" and "-doubt" or "-worry") end
   end
   drawCharacter(witnessArt,60,120,335,470,.98)
-  rounded(324,112,894,482,16,colors.paper)
-  rounded(324,112,894,58,14,colors.red); text("WITNESS: "..current.crossSpeaker,348,129,fonts.small,colors.white)
-  text("TESTIMONY",358,198,fonts.small,colors.blue)
-  text("“"..current.crossStatement.."”",358,231,fonts.mid,colors.ink,"left",808)
-  text("Which exhibit best tests that statement?",358,347,fonts.small,colors.red)
+  panel(324,112,894,482,14,colors.paper,{.67,.58,.43})
+  rounded(324,112,894,6,4,colors.red); text("WITNESS STATEMENT",354,137,fonts.tiny,colors.red)
+  text(current.crossSpeaker,354,166,fonts.mid,colors.ink,"left",820)
+  text("TESTIMONY",358,221,fonts.tiny,colors.blue)
+  text("“"..current.crossStatement.."”",358,249,fonts.mid,colors.ink,"left",808)
+  text("SELECT AN EXHIBIT",358,346,fonts.tiny,colors.red)
+  text("Which record tests that statement?",520,346,fonts.tiny,colors.blue)
   for i,label in ipairs(EVIDENCE_LABELS) do
-    local yy=385+(i-1)*56
+    local yy=381+(i-1)*55
     local c=colors.white
     if crossAnswered and i==crossSelected then c=crossCorrect and {.77,.97,.83} or {1,.80,.77} elseif not crossAnswered and i==crossSelected then c={.83,.91,1} end
-    rounded(358,yy,814,47,8,c); text(i.."   "..label,377,yy+12,fonts.small,colors.ink,"left",770)
+    rounded(358,yy,814,45,6,c); text(string.format("%02d",i),375,yy+12,fonts.tiny,colors.gold,"left",28); text(label,414,yy+12,fonts.small,colors.ink,"left",740)
   end
   if crossAnswered then
     text(crossFeedback,359,560,fonts.tiny,crossCorrect and colors.green or colors.red,"left",805)
@@ -393,13 +430,14 @@ end
 local function drawArgument()
   drawBackdrop("court"); drawTop("BUILD YOUR MOTION  •  LINK THE ARGUMENT")
   local titles={"1  WHAT DID POLICE DO?","2  WHICH RULE CONTROLS?","3  WHY WAS IT LAWFUL OR UNLAWFUL?","4  WHAT RELIEF FITS?"}
-  rounded(112,105,1056,510,18,colors.paper)
-  text("ARGUMENT BUILDER",150,126,fonts.head,colors.ink)
-  text(titles[argumentStep],154,191,fonts.mid,colors.red,"left",950)
+  panel(112,105,1056,510,14,colors.paper,{.67,.58,.43})
+  text("ARGUMENT BUILDER",150,122,fonts.head,colors.ink)
+  divider(154,178,970)
+  text(titles[argumentStep],154,195,fonts.mid,colors.red,"left",950)
   for i,label in ipairs(argumentChoices()) do
-    local yy=259+(i-1)*77; local c=colors.white
+    local yy=258+(i-1)*75; local c={.93,.92,.87}
     if argumentAnswered and i==argumentChoice then c=argumentChoice==argumentCorrectChoice() and {.77,.97,.83} or {1,.80,.77} elseif not argumentAnswered and i==argumentChoice then c={.83,.91,1} end
-    rounded(154,yy,970,64,9,c); text(i.."   "..label,177,yy+17,fonts.small,colors.ink,"left",925)
+    rounded(154,yy,970,61,7,c); rounded(169,yy+13,34,34,5,colors.navy); text(i,169,yy+21,fonts.tiny,colors.gold,"center",34); text(label,221,yy+17,fonts.small,colors.ink,"left",885)
   end
   if argumentAnswered then text(argumentMessage,158,511,fonts.tiny,argumentChoice==argumentCorrectChoice() and colors.green or colors.red,"left",940) end
   rounded(880,553,244,43,9,colors.gold); text(argumentAnswered and "NEXT LINK  →" or "LOCK IN LINK  →",880,565,fonts.tiny,colors.navy,"center",244)
@@ -408,12 +446,16 @@ end
 
 local function drawPractice()
   drawBackdrop("intro"); drawTop("PRACTICE DOCKET")
-  rounded(88,105,1104,535,18,colors.paper); text("Choose a case to rehearse",122,125,fonts.head,colors.ink)
+  panel(88,105,1104,535,14,colors.paper,{.67,.58,.43}); text("Choose a case to rehearse",122,122,fonts.head,colors.ink)
+  text("One focused hearing, with feedback after each decision.",125,169,fonts.small,colors.blue)
+  divider(120,192,1030)
   for i,c in ipairs(CASES) do
     local col=(i-1)%3; local row=math.floor((i-1)/3); local x=120+col*350; local y=205+row*96
-    rounded(x,y,320,78,8,i==practiceIndex and colors.red or {.91,.94,.95})
-    text(string.format("%02d  %s",i,c.title),x+13,y+11,fonts.tiny,i==practiceIndex and colors.white or colors.ink,"left",296)
-    text(DIFFICULTIES[c.tier].."  •  "..c.tag,x+14,y+43,fonts.tiny,i==practiceIndex and colors.cream or colors.blue,"left",295)
+    rounded(x,y,320,78,7,i==practiceIndex and {.88,.83,.69} or {.92,.91,.86})
+    rounded(x+10,y+13,38,38,5,i==practiceIndex and colors.navy or {.79,.77,.70})
+    text(string.format("%02d",i),x+10,y+24,fonts.tiny,i==practiceIndex and colors.gold or colors.ink,"center",38)
+    text(c.title,x+59,y+11,fonts.tiny,colors.ink,"left",248)
+    text(DIFFICULTIES[c.tier].."  ·  "..c.tag,x+59,y+43,fonts.tiny,colors.blue,"left",248)
   end
   rounded(472,564,336,48,9,colors.gold); text("START SELECTED CASE  →",472,578,fonts.small,colors.navy,"center",336)
   center("Arrow keys choose • Enter begins • Esc returns",622,fonts.tiny,colors.blue)
@@ -421,29 +463,42 @@ end
 
 local function drawNotebook()
   drawBackdrop("intro"); drawTop("DOCTRINE NOTEBOOK")
-  rounded(65,92,1150,560,18,colors.paper)
-  text("FIELD GUIDE",95,108,fonts.head,colors.ink)
+  panel(65,92,1150,560,14,colors.paper,{.67,.58,.43})
+  text("FIELD GUIDE",95,104,fonts.head,colors.ink)
+  text("PRECEDENT  /  CASE NOTES",99,153,fonts.tiny,colors.blue)
   local c=CASES[notebookIndex]
   text("CASES",100,171,fonts.small,colors.red)
   for i,entry in ipairs(CASES) do
     local yy=205+(i-1)*31
     local active=i==notebookIndex
-    if active then rounded(92,yy-3,347,29,5,{.88,.91,.96}) end
-    text(string.format("%02d  %s",i,entry.title),102,yy,fonts.tiny,active and colors.red or colors.ink,"left",325)
+    if active then rounded(92,yy-3,347,29,4,{.88,.84,.72}) end
+    text(string.format("%02d",i),101,yy,fonts.tiny,active and colors.red or colors.blue,"left",30)
+    text(entry.title,132,yy,fonts.tiny,active and colors.ink or {.35,.37,.38},"left",304)
   end
   rounded(463,169,1,436,1,{.78,.81,.82})
-  text(c.title,493,177,fonts.head,colors.ink,"left",675)
-  text(c.doctrine,496,235,fonts.mid,colors.blue,"left",665)
-  text("KEY FACTS",496,286,fonts.small,colors.red)
-  text(c.facts,496,313,fonts.small,colors.ink,"left",654)
-  text("EVIDENCE",496,424,fonts.small,colors.red)
-  text(c.item,496,451,fonts.small,colors.ink,"left",654)
-  text("PRACTICE RULING",496,491,fonts.small,colors.red)
-  text(c.outcome,496,518,fonts.small,colors.ink,"left",654)
-  rounded(942,590,235,43,8,colors.gold); text("PRACTICE THIS CASE",942,602,fonts.tiny,colors.navy,"center",235)
+  text(c.title,493,170,fonts.head,colors.ink,"left",675)
+  text(c.doctrine,496,224,fonts.mid,colors.blue,"left",665)
+  text("KEY FACTS",496,275,fonts.tiny,colors.red)
+  text(c.facts,496,300,fonts.tiny,colors.ink,"left",654)
+  divider(496,415,650)
+  text("EVIDENCE",496,430,fonts.tiny,colors.red)
+  text(c.item,496,454,fonts.small,colors.ink,"left",654)
+  text("PRACTICE RULING",496,491,fonts.tiny,colors.red)
+  text(c.outcome,496,516,fonts.tiny,colors.ink,"left",654)
+  rounded(942,590,235,43,6,colors.navy); text("PRACTICE THIS CASE",952,603,fonts.tiny,colors.gold,"center",215)
   text("↑ / ↓ browse • Enter practices",95,615,fonts.tiny,colors.blue)
 end
-local function answerRect(i) return 100, 458+(i-1)*59, 1080, 50 end
+local function promptLineCount()
+  local stage=questionDeck[stagePos]
+  if not stage then return 1 end
+  local _,wrapped=fonts.body:getWrap(stage.prompt,1070)
+  return math.max(1,#wrapped)
+end
+local function answerRect(i)
+  local promptBottom=426+promptLineCount()*fonts.body:getHeight()
+  local top=math.max(hintVisible and promptBottom+27 or 486,promptBottom+11)
+  return 100,top+(i-1)*48,1080,43
+end
 local function drawCourt()
   drawBackdrop("court"); drawTop("LEVEL "..casePos.." / "..#caseOrder.."  •  Q "..stagePos.." / "..#questionDeck)
   -- courtroom bar and two opponents
@@ -456,13 +511,15 @@ local function drawCourt()
   drawCharacter(witness,473,144,320,330,.82)
   rounded(34,82,366,44,8,colors.blue); text("DEFENSE  /  ATTORNEY",52,93,fonts.small,colors.white)
   rounded(880,82,366,44,8,colors.red); text("PROSECUTION  /  OPPOSING COUNSEL",896,93,fonts.tiny,colors.white)
-  rounded(72,365,1135,343,17,colors.paper)
-  rounded(72,365,1135,52,16,colors.navy); love.graphics.rectangle("fill",72,398,1135,19)
+  panel(72,365,1135,343,14,colors.paper,{.67,.58,.43})
+  rounded(72,365,1135,5,3,colors.gold)
+  rounded(72,375,1135,42,5,colors.navy)
   local stage=questionDeck[stagePos]
-  text("THE COURT WANTS YOUR THEORY",98,399,fonts.small,colors.gold)
-  text(stage.prompt,100,422,fonts.body,colors.ink,"left",1070)
+  text("THE COURT WANTS YOUR THEORY",98,388,fonts.tiny,colors.gold)
+  text(stage.prompt,100,426,fonts.body,colors.ink,"left",1070)
   if hintVisible and difficultyMode~=3 then
-    rounded(870,428,325,25,5,{.88,.94,1}); text("HINT: "..current.doctrine,881,432,fonts.tiny,colors.blue,"left",303)
+    local hintY=426+promptLineCount()*fonts.body:getHeight()+2
+    rounded(100,hintY,1080,18,4,{.89,.91,.88}); text("HINT  ·  "..current.doctrine,112,hintY+1,fonts.tiny,colors.blue,"left",1040)
   end
   for i,ch in ipairs(stage.choices) do
     local x,y,w,h=answerRect(i); local c=colors.white
@@ -470,14 +527,14 @@ local function drawCourt()
     rounded(x,y,w,h,9,c)
     set(not answered and i==selected and colors.blue or colors.ink)
     love.graphics.setLineWidth(not answered and i==selected and 3 or 1); love.graphics.rectangle("line",x,y,w,h,9)
-    rounded(x+12,y+9,40,41,8,not answered and i==selected and colors.blue or colors.navy)
-    text(tostring(i),x+12,y+17,fonts.small,colors.white,"center",40)
-    text(ch.text,x+64,y+11,fonts.small,colors.ink,"left",w-79)
+    rounded(x+12,y+5,32,31,6,not answered and i==selected and colors.blue or colors.navy)
+    text(tostring(i),x+12,y+11,fonts.tiny,colors.white,"center",32)
+    text(ch.text,x+58,y+5,fonts.choice,colors.ink,"left",w-72)
   end
   if answered then
-    rounded(108,636,1065,61,9,feedbackGood and colors.green or colors.red)
+    rounded(108,642,1065,53,7,feedbackGood and colors.green or colors.red)
     local label=(feedbackGood and "OBJECTION SUSTAINED!  " or "OBJECTION OVERRULED.  ")..feedback
-    text(label,126,645,fonts.tiny,colors.white,"left",1030)
+    text(label,126,650,fonts.tiny,colors.white,"left",1030)
     rounded(1080,17,166,43,8,colors.gold); text(stagePos==#questionDeck and "SEE RULING →" or "CONTINUE →",1080,28,fonts.tiny,colors.navy,"center",166)
   else
     text(difficultyMode==3 and "Expert: hints disabled" or "Choose a response  •  H shows doctrine hint",101,667,fonts.tiny,colors.muted)
@@ -486,40 +543,45 @@ end
 local function drawRuling()
   drawBackdrop("court"); drawTop("THE COURT HAS RULED")
   local good=caseCorrect>=3 and crossCorrect and argumentScore>=3
+  local granted=current.merit=="suppress" and good
+  local heading=current.merit=="deny" and "EVIDENCE ADMITTED" or (granted and "SUPPRESSION GRANTED" or "MOTION DENIED")
+  local rulingColor=granted and colors.green or (current.merit=="deny" and good and colors.green or colors.red)
   drawCharacter(good and "counsel-shout" or "counsel-surprised",8,104,455,590,.94)
-  rounded(350,132,858,496,18,colors.paper)
-  rounded(350,132,858,78,14,good and colors.green or colors.red)
-  love.graphics.rectangle("fill",350,180,858,30)
-  text(good and "PERFECT ARGUMENT!" or "CASE DECIDED",384,147,fonts.head,colors.white)
+  panel(350,132,858,496,14,colors.paper,{.67,.58,.43})
+  rounded(350,132,858,6,4,rulingColor)
+  text(heading,386,151,fonts.head,rulingColor,"left",770)
   text(current.title,390,231,fonts.mid,colors.ink,"left",770)
   text("YOUR PERFORMANCE",390,280,fonts.small,colors.blue)
   for i=1,#questionDeck do
-    local x=392+(i-1)*71; rounded(x,319,54,14,7,i<=caseCorrect and colors.gold or {.79,.81,.81})
+    local x=392+(i-1)*71
+    local mark=answerHistory[i]==nil and {.80,.79,.74} or (answerHistory[i] and colors.green or colors.red)
+    rounded(x,319,54,14,7,mark)
   end
   text(caseCorrect.." / "..#questionDeck.." calls  •  exhibit "..(crossCorrect and "proved" or "missed").."  •  argument "..argumentScore.." / 4",390,344,fonts.tiny,colors.ink)
-  rounded(386,391,782,1,1,{.82,.83,.81})
-  text("THE RULING",390,413,fonts.small,colors.red)
+  divider(390,386,778)
+  text("THE RULING",390,407,fonts.tiny,colors.red)
   local ruling=current.outcome
   if current.merit=="suppress" and not good then ruling="MOTION DENIED ON THIS RECORD. Strengthen the factual link, witness challenge, and requested remedy before seeking suppression. "..current.doctrine.." may support a renewed motion on a better-developed record."
   elseif current.merit=="deny" and not good then ruling="EVIDENCE ADMITTED. The record supports this search under the governing rule; test the details and acknowledge the doctrine's limits."
   end
-  text(ruling,390,445,fonts.body,colors.ink,"left",740)
-  text("RULE: "..current.doctrine,390,550,fonts.tiny,colors.blue,"left",740)
-  rounded(657,648,250,48,9,colors.gold); text(casePos==#caseOrder and "FINAL SCORE →" or "NEXT CASE →",657,660,fonts.small,colors.navy,"center",250)
+  text(ruling,390,435,fonts.body,colors.ink,"left",740)
+  text("PRECEDENT  ·  "..current.doctrine,390,560,fonts.tiny,colors.blue,"left",740)
+  rounded(657,648,250,48,7,colors.navy); text(casePos==#caseOrder and "FINAL SCORE  →" or "NEXT CASE  →",671,661,fonts.tiny,colors.gold,"center",222)
 end
 local function drawResults()
   drawBackdrop("intro"); drawCharacter("counsel-shout",28,100,442,594,.92); drawCharacter("prosecutor-surprised",810,91,420,600,.9)
-  rounded(322,105,636,502,20,colors.paper)
-  rounded(322,105,636,92,18,colors.red); love.graphics.rectangle("fill",322,167,636,30)
-  text("TRIAL COMPLETE",352,123,fonts.head,colors.white,"center",576)
+  panel(322,105,636,502,16,colors.paper,{.67,.58,.43})
+  rounded(322,105,636,6,4,colors.gold)
+  text("TRIAL COMPLETE",352,123,fonts.head,colors.ink,"center",576)
   text("YOUR FINAL SCORE",352,229,fonts.small,colors.blue,"center",576)
   text(score.."  /  "..runMaxScore,352,272,fonts.huge,colors.ink,"center",576)
   local rank=score>=math.ceil(runMaxScore*.9) and "ACE COUNSEL" or (score>=math.ceil(runMaxScore*.7) and "SHARP ADVOCATE" or (score>=math.ceil(runMaxScore*.45) and "COUNSEL IN TRAINING" or "BACK TO THE BOOKS"))
   text(rank,352,380,fonts.head,colors.red,"center",576)
+  divider(395,429,490)
   text("Every case can turn on one small fact. Review the doctrine,\nquestion the search, and keep the remedy precise.",384,442,fonts.small,colors.ink,"center",512)
   text(runMode=="daily" and ("DAILY DOCKET  /  "..dailyLabel) or (runMode=="practice" and "SINGLE CASE PRACTICE" or "QUESTION AND ANSWER ORDER SHUFFLED EACH DOCKET"),352,501,fonts.tiny,colors.blue,"center",576)
-  rounded(482,536,316,53,10,colors.gold); text("PLAY ANOTHER DOCKET",482,551,fonts.small,colors.navy,"center",316)
-  center("Enter to play again     ·     Esc for title",624,fonts.tiny,colors.cream)
+  rounded(482,536,316,53,7,colors.navy); text("BACK TO MAIN MENU",482,551,fonts.tiny,colors.gold,"center",316)
+  center("Enter or click to continue  ·  Escape returns",624,fonts.tiny,colors.cream)
 end
 local function draw()
   love.graphics.push(); love.graphics.translate(ox,oy); love.graphics.scale(scale)
@@ -610,23 +672,23 @@ function love.mousepressed(mx,my,button)
   if button~=1 then return end
   local x,y=(mx-ox)/scale,(my-oy)/scale
   if screen=="title" then
-    if y>=328 and y<385 then beginGame()
-    elseif y>=395 and y<452 then beginDaily()
-    elseif y>=462 and y<519 then screen="practice"
-    elseif y>=529 and y<586 then screen="notebook"
-    elseif y>=608 and y<649 then difficultyMode=difficultyMode%3+1 end
+    for i=1,4 do local yy=328+(i-1)*61; if x>=397 and x<=883 and y>=yy and y<=yy+53 then
+        if i==1 then beginGame() elseif i==2 then beginDaily() elseif i==3 then screen="practice" else screen="notebook" end
+        return
+    end end
+    if x>=500 and x<=780 and y>=584 and y<=623 then difficultyMode=difficultyMode%3+1 end
   elseif screen=="intro" then startCase()
   elseif screen=="investigation" then
-    for i=1,3 do local tx=114+(i-1)*350; if x>=tx and x<=tx+322 and y>=211 and y<=267 then evidenceViewed[i]=true; evidenceTab=i; return end end
+    for i=1,3 do local tx=114+(i-1)*350; if x>=tx and x<=tx+322 and y>=207 and y<=261 then evidenceViewed[i]=true; evidenceTab=i; return end end
     if x>=114 and x<=364 and y>=574 and y<=617 then evidenceViewed[evidenceTab]=true; evidenceTab=(evidenceTab+1)%3+1
     elseif x>=382 and x<=632 and y>=574 and y<=617 then evidenceViewed[evidenceTab]=true; evidenceTab=evidenceTab%3+1
     elseif x>=847 and x<=1134 and y>=574 and y<=617 and evidenceViewed[1] and evidenceViewed[2] and evidenceViewed[3] then screen="cross" end
   elseif screen=="cross" then
     if crossAnswered then if x>=901 and x<=1172 and y>=626 and y<=674 then beginQuestions() end
-    else for i=1,3 do local yy=385+(i-1)*56; if x>=358 and x<=1172 and y>=yy and y<=yy+47 then crossSelected=i; advance(); return end end end
+    else for i=1,3 do local yy=381+(i-1)*55; if x>=358 and x<=1172 and y>=yy and y<=yy+45 then crossSelected=i; advance(); return end end end
   elseif screen=="argument" then
     if argumentAnswered then if x>=880 and x<=1124 and y>=553 and y<=596 then submitArgument(argumentChoice) end
-    else for i=1,3 do local yy=259+(i-1)*77; if x>=154 and x<=1124 and y>=yy and y<=yy+64 then argumentChoice=i; submitArgument(i); return end end end
+    else for i=1,3 do local yy=258+(i-1)*75; if x>=154 and x<=1124 and y>=yy and y<=yy+61 then argumentChoice=i; submitArgument(i); return end end end
   elseif screen=="practice" then
     for i=1,#CASES do local col=(i-1)%3; local row=math.floor((i-1)/3); local bx=120+col*350; local by=205+row*96
       if x>=bx and x<=bx+320 and y>=by and y<=by+78 then practiceIndex=i; beginPractice(i); return end end
