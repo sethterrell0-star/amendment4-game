@@ -400,13 +400,16 @@ local function drawLearnIllustration(kind,x,y,w,h)
     set(colors.red); love.graphics.circle("fill",x+w-55,y+67,22)
     set(colors.paper); love.graphics.polygon("fill",x+w-55,y+53,x+w-44,y+58,x+w-47,y+72,x+w-55,y+79,x+w-63,y+72,x+w-66,y+58)
   elseif kind=="scales" then
-    set(colors.gold); love.graphics.setLineWidth(4)
-    love.graphics.line(x+w/2,y+31,x+w/2,y+h-36); love.graphics.line(x+w/2-48,y+52,x+w/2+48,y+52)
-    love.graphics.line(x+w/2-38,y+53,x+w/2-52,y+88); love.graphics.line(x+w/2-38,y+53,x+w/2-23,y+88)
-    love.graphics.line(x+w/2+38,y+53,x+w/2+23,y+88); love.graphics.line(x+w/2+38,y+53,x+w/2+52,y+88)
-    love.graphics.arc("line","open",x+w/2-52,y+83,18,0,math.pi); love.graphics.arc("line","open",x+w/2+52,y+83,18,0,math.pi)
-    love.graphics.line(x+w/2-20,y+h-36,x+w/2+20,y+h-36)
-    love.graphics.line(x+w/2-32,y+h-30,x+w/2+32,y+h-30)
+    local sy=math.min(1,(h-4)/101)
+    local top=y+(h-101*sy)/2-31*sy
+    local cx=x+w/2
+    set(colors.gold); love.graphics.setLineWidth(4*sy)
+    love.graphics.line(cx,top+31*sy,cx,top+90*sy); love.graphics.line(cx-48,top+52*sy,cx+48,top+52*sy)
+    love.graphics.line(cx-38,top+53*sy,cx-52,top+88*sy); love.graphics.line(cx-38,top+53*sy,cx-23,top+88*sy)
+    love.graphics.line(cx+38,top+53*sy,cx+23,top+88*sy); love.graphics.line(cx+38,top+53*sy,cx+52,top+88*sy)
+    love.graphics.arc("line","open",cx-52,top+83*sy,18*sy,0,math.pi); love.graphics.arc("line","open",cx+52,top+83*sy,18*sy,0,math.pi)
+    love.graphics.line(cx-20,top+90*sy,cx+20,top+90*sy)
+    love.graphics.line(cx-32,top+96*sy,cx+32,top+96*sy)
   end
 end
 local function drawLearn()
