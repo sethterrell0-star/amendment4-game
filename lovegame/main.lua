@@ -353,7 +353,7 @@ local function drawCross()
   for i,label in ipairs(EVIDENCE_LABELS) do
     local yy=385+(i-1)*56
     local c=colors.white
-    if crossAnswered and i==current.crossEvidence then c={.77,.97,.83} elseif crossAnswered and i==crossSelected then c={1,.80,.77} elseif not crossAnswered and i==crossSelected then c={.83,.91,1} end
+    if crossAnswered and i==crossSelected then c=crossCorrect and {.77,.97,.83} or {1,.80,.77} elseif not crossAnswered and i==crossSelected then c={.83,.91,1} end
     rounded(358,yy,814,47,8,c); text(i.."   "..label,377,yy+12,fonts.small,colors.ink,"left",770)
   end
   if crossAnswered then
@@ -387,7 +387,7 @@ local function submitArgument(choice)
   elseif argumentStep==4 and current.merit=="deny" and good then
     argumentMessage="Correct: without a violation, suppression is not the proper remedy."
   else
-    argumentMessage=good and "Strong link. Your theory connects the record to the governing rule." or "This link does not fit the record. Review the marked answer and keep the remedy precise."
+    argumentMessage=good and "Strong link. Your theory connects the record to the governing rule." or "This link does not fit the record. Revisit the evidence and keep the remedy precise."
   end
 end
 local function drawArgument()
@@ -398,7 +398,7 @@ local function drawArgument()
   text(titles[argumentStep],154,191,fonts.mid,colors.red,"left",950)
   for i,label in ipairs(argumentChoices()) do
     local yy=259+(i-1)*77; local c=colors.white
-    if argumentAnswered and i==argumentCorrectChoice() then c={.77,.97,.83} elseif argumentAnswered and i==argumentChoice then c={1,.80,.77} elseif not argumentAnswered and i==argumentChoice then c={.83,.91,1} end
+    if argumentAnswered and i==argumentChoice then c=argumentChoice==argumentCorrectChoice() and {.77,.97,.83} or {1,.80,.77} elseif not argumentAnswered and i==argumentChoice then c={.83,.91,1} end
     rounded(154,yy,970,64,9,c); text(i.."   "..label,177,yy+17,fonts.small,colors.ink,"left",925)
   end
   if argumentAnswered then text(argumentMessage,158,511,fonts.tiny,argumentChoice==argumentCorrectChoice() and colors.green or colors.red,"left",940) end
@@ -466,7 +466,7 @@ local function drawCourt()
   end
   for i,ch in ipairs(stage.choices) do
     local x,y,w,h=answerRect(i); local c=colors.white
-    if answered and i==stage.correct then c={.77,.97,.83} elseif answered and i==selected then c={1,.80,.77} elseif not answered and i==selected then c={.83,.91,1} end
+    if answered and i==selected then c=feedbackGood and {.77,.97,.83} or {1,.80,.77} elseif not answered and i==selected then c={.83,.91,1} end
     rounded(x,y,w,h,9,c)
     set(not answered and i==selected and colors.blue or colors.ink)
     love.graphics.setLineWidth(not answered and i==selected and 3 or 1); love.graphics.rectangle("line",x,y,w,h,9)
@@ -533,7 +533,7 @@ local function advance()
     if not crossAnswered then
       crossAnswered=true; crossCorrect=crossSelected==current.crossEvidence
       if crossCorrect then score=score+1; crossFeedback="Exhibit admitted. You tested the witness's account against the record."
-      else crossFeedback="This exhibit does not test the statement. The stronger exhibit is highlighted." end
+      else crossFeedback="This exhibit does not establish the point you need. Reconsider what the record actually shows." end
     else beginQuestions() end
   elseif screen=="argument" then submitArgument(argumentChoice)
   elseif screen=="play" then finishAnswer(selected)
