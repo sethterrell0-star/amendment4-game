@@ -159,11 +159,14 @@ local function drawCharacter(name,x,y,w,h,alpha)
   -- Original layered box-character art: every layer is drawn in LÖVE so the
   -- cast stays crisp and can be recolored without external sprite files.
   local witness=name:find("witness")~=nil
+  local witnessOne=name:find("witness%-one")~=nil
+  local witnessTwo=name:find("witness%-two")~=nil
   local counsel=name:find("counsel")~=nil
   local prosecutor=name:find("prosecutor")~=nil
-  local palette = witness and {{.18,.42,.55},{.12,.29,.40},{.92,.67,.46},{.16,.12,.12}}
-    or counsel and {{.18,.36,.78},{.10,.19,.43},{.91,.65,.45},{.12,.08,.07}}
-    or {{.62,.16,.19},{.37,.08,.12},{.81,.53,.39},{.12,.08,.07}}
+  local palette = witnessOne and {{.18,.48,.43},{.10,.27,.25},{.77,.49,.34},{.20,.09,.06}}
+    or witnessTwo and {{.68,.43,.20},{.37,.23,.12},{.94,.73,.55},{.24,.13,.08}}
+    or counsel and {{.12,.31,.70},{.07,.16,.40},{.89,.60,.41},{.12,.07,.045}}
+    or {{.31,.18,.25},{.12,.10,.17},{.72,.43,.32},{.075,.055,.07}}
   local coat,shade,skin,hair=palette[1],palette[2],palette[3],palette[4]
   local surprised=name:find("surprised") or name:find("shocked") or name:find("worry")
   local angry=name:find("angry") or name:find("shout")
@@ -176,23 +179,75 @@ local function drawCharacter(name,x,y,w,h,alpha)
     set(c,alpha or 1); love.graphics.rectangle("fill",bx,by,bw,bh,r or 3)
     set({.035,.045,.075},(alpha or 1)*.9); love.graphics.setLineWidth(math.max(1,2*s)); love.graphics.rectangle("line",bx,by,bw,bh,r or 3)
   end
-  -- Neck, block torso, tie and shirt are separate depth layers.
+  local function polygon(points,c)
+    set(c,alpha or 1); love.graphics.polygon("fill",unpack(points))
+    set({.035,.045,.075},(alpha or 1)*.88); love.graphics.setLineWidth(math.max(1,2*s)); love.graphics.polygon("line",unpack(points))
+  end
+  local shoulder=counsel and 73 or (witnessOne and 72 or 62)
+  local faceHalf=counsel and 43 or (prosecutor and 40 or (witnessOne and 46 or 40))
+  -- The attorney and prosecutor wear sharply cut suits; witnesses wear casual
+  -- knit layers with visibly different shapes, palettes and accessories.
   box(cx-19*s,top+72*s,38*s,36*s,skin)
-  box(cx-70*s,top+100*s,140*s,155*s,shade,8*s)
-  box(cx-59*s,top+104*s,118*s,139*s,coat,6*s)
-  box(cx-24*s,top+104*s,48*s,95*s,{.96,.93,.82})
-  box(cx-8*s,top+108*s,16*s,91*s,prosecutor and colors.gold or colors.red,2*s)
+  if witnessTwo then
+    box(cx-67*s,top+97*s,134*s,158*s,shade,22*s) -- soft hoodie silhouette
+    box(cx-57*s,top+103*s,114*s,139*s,coat,18*s)
+    box(cx-26*s,top+99*s,52*s,38*s,{.82,.66,.43},14*s) -- hood opening
+  elseif witnessOne then
+    polygon({cx-shoulder*s,top+112*s,cx-57*s,top+96*s,cx+57*s,top+96*s,cx+shoulder*s,top+112*s,cx+66*s,top+253*s,cx-66*s,top+253*s},shade)
+    box(cx-57*s,top+105*s,114*s,138*s,coat,5*s)
+    box(cx-28*s,top+103*s,56*s,72*s,{.91,.79,.64},3*s)
+  elseif counsel then
+    polygon({cx-shoulder*s,top+112*s,cx-53*s,top+96*s,cx+53*s,top+96*s,cx+shoulder*s,top+112*s,cx+68*s,top+253*s,cx-68*s,top+253*s},shade)
+    box(cx-58*s,top+105*s,116*s,138*s,coat,3*s)
+    box(cx-24*s,top+104*s,48*s,93*s,{.98,.96,.86},2*s)
+  else
+    polygon({cx-shoulder*s,top+111*s,cx-51*s,top+97*s,cx+51*s,top+97*s,cx+shoulder*s,top+111*s,cx+58*s,top+253*s,cx-58*s,top+253*s},shade)
+    box(cx-51*s,top+105*s,102*s,138*s,coat,3*s)
+    box(cx-23*s,top+104*s,46*s,87*s,{.99,.97,.90},2*s)
+  end
+  if counsel or prosecutor then
+    local tie=prosecutor and colors.gold or { .79,.13,.22 }
+    polygon({cx-12*s,top+109*s,cx+12*s,top+109*s,cx+10*s,top+132*s,cx+17*s,top+188*s,cx,top+202*s,cx-17*s,top+188*s,cx-10*s,top+132*s},tie)
+  elseif witnessOne then
+    -- Casual overshirt seams and chest pocket.
+    set({.81,.91,.85},alpha or 1); love.graphics.setLineWidth(2*s)
+    love.graphics.line(cx-38*s,top+112*s,cx-35*s,top+239*s); love.graphics.line(cx+38*s,top+112*s,cx+35*s,top+239*s)
+    box(cx+16*s,top+147*s,23*s,25*s,{.13,.34,.31},2*s)
+  else
+    -- Hoodie drawstrings and a small stitched emblem.
+    set({.95,.78,.46},alpha or 1); love.graphics.setLineWidth(2*s)
+    love.graphics.line(cx-9*s,top+119*s,cx-13*s,top+158*s); love.graphics.line(cx+9*s,top+119*s,cx+13*s,top+158*s)
+    set({.97,.77,.34},alpha or 1); love.graphics.circle("fill",cx+31*s,top+195*s,5*s)
+  end
+  if prosecutor then
+    box(cx+31*s,top+118*s,14*s,25*s,{.93,.91,.82},2*s) -- pocket square
+  elseif counsel then
+    set(colors.gold,alpha or 1); love.graphics.circle("fill",cx+40*s,top+150*s,5*s)
+    set(colors.ink,alpha or 1); love.graphics.circle("fill",cx+40*s,top+150*s,2*s) -- scales pin
+  end
   -- Detached hands: deliberately no arms.
   local gesture=angry and math.abs(math.sin(phase*1.7))*9*s or (surprised and math.sin(phase*1.3)*5*s or math.sin(phase)*2*s)
   local handY=top+149*s-gesture
-  box(cx-91*s,handY,29*s,38*s,skin,8*s); box(cx+62*s,handY,29*s,38*s,skin,8*s)
+  box(cx-(shoulder+21)*s,handY,29*s,38*s,skin,8*s); box(cx+(shoulder-8)*s,handY,29*s,38*s,skin,8*s)
   set({1,.81,.64},alpha or 1); love.graphics.rectangle("fill",cx-86*s,handY+5*s,5*s,21*s,2*s); love.graphics.rectangle("fill",cx+81*s,handY+5*s,5*s,21*s,2*s)
   -- Face base, shadow plane, cheeks, brows, eyes, nose and mouth.
-  box(cx-48*s,top+8*s,96*s,79*s,skin,8*s)
-  box(cx-43*s,top+57*s,86*s,24*s,{.70,.43,.32},5*s)
+  box(cx-faceHalf*s,top+8*s,faceHalf*2*s,79*s,skin,8*s)
+  box(cx-faceHalf*s+5*s,top+57*s,faceHalf*2*s-10*s,24*s,{.70,.43,.32},5*s)
   box(cx-37*s,top+51*s,18*s,10*s,{.98,.76,.59},4*s); box(cx+19*s,top+51*s,18*s,10*s,{.98,.76,.59},4*s)
-  box(cx-49*s,top-1*s,98*s,21*s,hair,5*s)
-  box(cx-49*s,top+5*s,17*s,26*s,hair,3*s)
+  if witnessTwo then
+    -- Curly fringe and round glasses make the second witness distinct even
+    -- when their expression changes during testimony.
+    for _,dx in ipairs({-34,-20,-5,11,27}) do set(hair,alpha or 1); love.graphics.circle("fill",cx+dx*s,top+10*s,12*s) end
+  elseif prosecutor then
+    box(cx-42*s,top-2*s,86*s,19*s,hair,3*s)
+    polygon({cx+5*s,top+3*s,cx+44*s,top-2*s,cx+37*s,top+30*s,cx+25*s,top+24*s},hair)
+  elseif witnessOne then
+    box(cx-47*s,top+1*s,91*s,18*s,hair,9*s)
+    box(cx-47*s,top+9*s,15*s,33*s,hair,5*s)
+  else
+    box(cx-44*s,top-1*s,88*s,19*s,hair,3*s)
+    box(cx-44*s,top+5*s,15*s,30*s,hair,3*s)
+  end
   local brow=angry and colors.red or hair
   box(cx-31*s,top+31*s,24*s,5*s,brow,2*s); box(cx+7*s,top+31*s,24*s,5*s,brow,2*s)
   local blink=math.abs(math.sin(animTime*1.1+x*.022))>.995
@@ -200,14 +255,24 @@ local function drawCharacter(name,x,y,w,h,alpha)
   box(cx-27*s,top+39*s,13*s,eyeH,{.98,.98,.92},3*s); box(cx+14*s,top+39*s,13*s,eyeH,{.98,.98,.92},3*s)
   set(colors.ink,alpha or 1); love.graphics.circle("fill",cx-20*s,top+44*s,3.2*s); love.graphics.circle("fill",cx+21*s,top+44*s,3.2*s)
   box(cx-3*s,top+43*s,6*s,14*s,{.68,.40,.31},2*s)
+  if witnessTwo then
+    set({.13,.12,.10},alpha or 1); love.graphics.setLineWidth(2.4*s)
+    love.graphics.rectangle("line",cx-31*s,top+36*s,23*s,19*s,5*s); love.graphics.rectangle("line",cx+8*s,top+36*s,23*s,19*s,5*s)
+    love.graphics.line(cx-8*s,top+44*s,cx+8*s,top+44*s)
+  end
   local mouthY=top+(surprised and 65 or 66)*s
   if surprised then set({.30,.05,.06},alpha or 1); love.graphics.ellipse("fill",cx,mouthY,8*s,11*s)
   elseif angry then set({.36,.04,.05},alpha or 1); love.graphics.ellipse("fill",cx,mouthY,12*s,(5+math.abs(math.sin(animTime*9+x)) * 4)*s)
   elseif doubtful then set({.34,.08,.09},alpha or 1); love.graphics.line(cx-11*s,mouthY+4*s,cx+11*s,mouthY-2*s)
   else set({.34,.08,.09},alpha or 1); love.graphics.line(cx-10*s,mouthY,cx+10*s,mouthY) end
   -- Lapel highlights provide a final foreground layer.
-  set({.78,.84,1},(alpha or 1)*.78); love.graphics.polygon("fill",cx-57*s,top+112*s,cx-31*s,top+137*s,cx-46*s,top+167*s)
-  set(colors.white,(alpha or 1)*.17); love.graphics.rectangle("fill",cx+42*s,top+108*s,8*s,130*s)
+  if counsel or prosecutor then
+    set({.78,.84,1},(alpha or 1)*.78)
+    polygon({cx-53*s,top+108*s,cx-30*s,top+132*s,cx-45*s,top+167*s})
+    polygon({cx+53*s,top+108*s,cx+30*s,top+132*s,cx+45*s,top+167*s})
+  else
+    set({1,.96,.80},(alpha or 1)*.22); love.graphics.rectangle("fill",cx-4*s,top+179*s,8*s,64*s)
+  end
 end
 local function drawLogo(y)
   center("FOURTH",y,fonts.huge,colors.cream)
