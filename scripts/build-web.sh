@@ -7,6 +7,7 @@ rm -f lovegame/fourth-counsel.love
 (cd lovegame && zip -qr fourth-counsel.love conf.lua main.lua case_data.lua custom_art.lua assets)
 rm -rf docs/* docs/.[!.]* docs/..?* 2>/dev/null || true
 npx love.js lovegame/fourth-counsel.love docs -c -t "Fourth Counsel"
+cp -R site-assets/. docs/
 # Keep generated JavaScript diffs stable across love.js versions/platforms.
 sed -i 's/[[:space:]]*$//' docs/game.js
 sed -i 's/[[:space:]]*$//' docs/index.html
@@ -14,6 +15,22 @@ sed -i 's/[[:space:]]*$//' docs/index.html
 BUILD_ID="$(sed -n 's/.*"package_uuid":"\([^"]*\)".*/\1/p' docs/game.js | tail -1)"
 sed -i "s#src=\"game.js\"#src=\"game.js?v=${BUILD_ID}\"#" docs/index.html
 sed -i "s#REMOTE_PACKAGE_BASE = 'game.data';#REMOTE_PACKAGE_BASE = 'game.data?v=${BUILD_ID}';#" docs/game.js
+python3 - <<'PYHTML'
+from pathlib import Path
+path = Path("docs/index.html")
+html = path.read_text()
+needle = '    <link rel="stylesheet" type="text/css" href="theme/love.css">\n'
+icons = '''    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="alternate icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="manifest" href="site.webmanifest">
+    <meta name="theme-color" content="#101a2a">
+'''
+if "favicon.svg" not in html:
+    html = html.replace(needle, needle + icons)
+html = html.replace("Hint: Reload the page if screen is blank", "Hint: Press M in game to toggle music")
+path.write_text(html)
+PYHTML
 touch docs/.nojekyll
 cat >> docs/theme/love.css <<'CSS'
 

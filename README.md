@@ -26,7 +26,7 @@ love lovegame
 
 ## Controls
 
-- On the title screen, press `1` for campaign, `2` for daily, `3` for practice, `4` for the notebook, or `5` for Learn. Press `D` to cycle difficulty.
+- On the title screen, press `1` for campaign, `2` for daily, `3` for practice, `4` for the notebook, or `5` for Learn. Press `D` to cycle difficulty and `M` to toggle the original looping courtroom score (it starts after your first key or mouse input, as browsers require).
 - In Learn, scroll with the mouse wheel or arrow/Page Up/Page Down keys. Home and End jump to the beginning and end.
 - On the evidence desk, click each record or use left/right and Enter to review it.
 - During cross-examination and argument building, click an option or use `1`, `2`, or `3`; press Enter to continue after feedback.

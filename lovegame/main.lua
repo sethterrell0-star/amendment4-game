@@ -17,6 +17,7 @@ local argumentMessage = ""
 local animTime = 0
 local learnScroll = 0
 local scale, ox, oy = 1, 0, 0
+local musicSource, musicEnabled = nil, true
 local DIFFICULTY_NAMES = {"STUDY", "STANDARD", "EXPERT"}
 local EVIDENCE_LABELS = {"CASE FILE", "ITEM AT ISSUE", "PRECEDENT"}
 local colors = {
@@ -24,6 +25,22 @@ local colors = {
   red={.58,.17,.19}, gold={.84,.68,.42}, cream={.94,.90,.80}, paper={.965,.95,.90},
   white={1,1,1}, muted={.68,.72,.76}, green={.22,.51,.39}, dark={.035,.047,.067}
 }
+local function startMusic()
+  if not musicEnabled then return end
+  if not musicSource then
+    local ok, source = pcall(love.audio.newSource, "assets/music/courtroom-underscoring.ogg", "stream")
+    if not ok or not source then return end
+    musicSource = source
+    musicSource:setLooping(true)
+    musicSource:setVolume(0.2)
+  end
+  if not musicSource:isPlaying() then musicSource:play() end
+end
+local function toggleMusic()
+  musicEnabled = not musicEnabled
+  if musicEnabled then startMusic()
+  elseif musicSource then musicSource:pause() end
+end
 local function set(c,a) love.graphics.setColor(c[1],c[2],c[3],a or 1) end
 local function rounded(x,y,w,h,r,c)
   set(c); love.graphics.rectangle("fill",x,y,w,h,r or 8)
@@ -466,7 +483,7 @@ local function drawTitle()
   end
   rounded(500,572,280,35,6,{.13,.16,.21})
   text("DIFFICULTY  ·  "..DIFFICULTY_NAMES[difficultyMode].."  (D)",510,582,fonts.tiny,colors.cream,"center",260)
-  center("Press 1–5 to choose  ·  D changes difficulty",680,fonts.tiny,colors.muted)
+  center("Press 1–5 to choose  ·  D changes difficulty  ·  M toggles music",680,fonts.tiny,colors.muted)
 end
 local function drawIntro()
   drawBackdrop("intro"); drawTop("LEVEL  "..casePos.." / "..#caseOrder.."  •  "..DIFFICULTIES[current.tier])
@@ -759,6 +776,8 @@ end
 function love.update(dt) animTime=animTime+math.min(dt,.05) end
 function love.draw() draw() end
 function love.keypressed(key)
+  if key=="m" then toggleMusic(); return end
+  startMusic()
   if key=="escape" then screen="title"; return end
   if screen=="title" then
     if key=="d" then difficultyMode=difficultyMode%3+1
@@ -823,6 +842,7 @@ function love.keypressed(key)
 end
 function love.mousepressed(mx,my,button)
   if button~=1 then return end
+  startMusic()
   local x,y=(mx-ox)/scale,(my-oy)/scale
   if screen=="title" then
     for i=1,5 do local yy=313+(i-1)*49; if x>=397 and x<=883 and y>=yy and y<=yy+43 then
