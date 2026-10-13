@@ -1,6 +1,8 @@
 # Fourth Counsel
 
-A courtroom visual novel about the Fourth Amendment. A docket has 12 levels across four rising difficulty bands, with four questions per case. Case order is shuffled within each band; question order and answer positions are shuffled for each run. Some searches are lawful. After every case, the player sees the court's ruling and the doctrine behind it.
+A courtroom visual novel about the Fourth Amendment. Its 12 cases cover four rising difficulty bands, with four randomized courtroom questions per case. A full case now moves from an evidence desk through witness cross-examination and a four-link motion builder to a branching ruling. Some searches are lawful, so the defense must fit the facts to the doctrine instead of arguing suppression every time.
+
+Choose a full campaign, a date-seeded daily docket, single-case practice, or the doctrine notebook. Study mode shows free hints, Standard deducts a point when a used hint leads to a correct answer, and Expert disables hints. Case order is shuffled inside each difficulty band; questions and answer positions are shuffled each run. The daily docket uses the UTC date as its seed, so players get the same shuffle that day.
 
 The game is written in **LÖVE 11.4 / Lua**. It also ships as a static browser build using love.js and WebAssembly. No server code or runtime network requests are needed.
 
@@ -26,10 +28,12 @@ The `.love` source package is also at `lovegame/fourth-counsel.love`.
 
 ## Controls
 
-- Click or press Enter to continue through the title, case file, and ruling.
-- Click an answer or press `1`, `2`, or `3` in court.
-- Use the up and down arrows to move the answer highlight.
-- Press Enter after feedback to advance.
+- On the title screen, press `1` for campaign, `2` for daily, `3` for practice, or `4` for the notebook. Press `D` to cycle difficulty.
+- On the evidence desk, click each record or use left/right and Enter to review it.
+- During cross-examination and argument building, click an option or use `1`, `2`, or `3`; press Enter to continue after feedback.
+- In court, click an answer or press `1`, `2`, or `3`; use up/down to move the highlight. Press `H` for a doctrine hint outside Expert mode.
+- In practice and the notebook, use arrow keys to browse cases; Enter starts practice.
+- Press Escape to return to the title.
 - Press Escape to return to the title.
 - Use the Fullscreen button under the game in a browser.
 
@@ -42,11 +46,11 @@ npm install
 npm run build:web
 ```
 
-This packages the editable Lua project and assets, then regenerates `docs/` for publishing. To change a case, edit `lovegame/case_data.lua`; to change the interface, edit `lovegame/main.lua`.
+This packages the editable Lua project and assets, then regenerates `docs/` for publishing. To change a case, edit `lovegame/case_data.lua`; to change the interface, animation, or built-in character art, edit `lovegame/main.lua`.
 
 ## Replace the artwork
 
-Replace the PNGs under `lovegame/assets/characters/` while keeping their filenames, or update the image names in `lovegame/main.lua`. Each pose is a separate replaceable portrait. Replace the background photos under `lovegame/assets/` using their existing filenames. The browser build embeds local copies, so it does not hotlink artwork.
+The default cast is original procedural art drawn in LÖVE: layered box-shaped faces, changing expressions, floating hands with no arms, and idle/blink/gesture animations. To override a portrait with your own PNG, add it under `lovegame/assets/characters/custom/` using the matching pose name (for example `counsel-neutral.png` or `witness-one-shocked.png`). Each pose is replaceable independently. Replace background photos under `lovegame/assets/` using their existing filenames. The browser build embeds local copies and does not hotlink artwork.
 
 See [ASSETS.md](ASSETS.md) for sources and licenses. Keep the relevant license and attribution with any replacement art.
 
