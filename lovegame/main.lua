@@ -233,7 +233,7 @@ local function drawTop(label)
 end
 local function drawCharacter(name,x,y,w,h,alpha)
   if art[name] then imageFit(art[name],x,y,w,h,alpha); return end
-  -- Original layered box-character art: every layer is drawn in LÖVE so the
+  -- Original layered box-character art: every layer is drawn in LOVE so the
   -- cast stays crisp and can be recolored without external sprite files.
   local witness=name:find("witness")~=nil
   local witnessOne=name:find("witness%-one")~=nil
@@ -428,7 +428,7 @@ local function drawLearn()
   rounded(96,300,1084,194,10,{.94,.92,.87})
   text("WHY WAS IT PROPOSED?",118,316,fonts.small,colors.red)
   text("Before independence, British officers used writs of assistance and broad general warrants to search for smuggled goods. These orders could leave the place and objects to be searched largely to an officer's discretion. Colonists objected to that kind of arbitrary search. During the debates over ratifying the Constitution, several states called for written protections; James Madison introduced amendments in the First Congress.",118,345,fonts.tiny,colors.ink,"left",688)
-  text("HISTORICAL CONTEXT  ·  NATIONAL ARCHIVES; U.S. REPORTS",118,465,fonts.tiny,colors.blue)
+  text("HISTORICAL CONTEXT   |   NATIONAL ARCHIVES; U.S. REPORTS",118,465,fonts.tiny,colors.blue)
   drawLearnIllustration("colonial",843,323,310,151)
 
   rounded(96,508,1084,249,10,{.94,.92,.87})
@@ -458,11 +458,11 @@ local function drawLearn()
   rounded(96,936,1084,201,10,{.12,.17,.21})
   text("WHY IT STILL MATTERS",118,952,fonts.small,colors.gold)
   text("The same protection applies to modern evidence, including phones and location records. In Riley v. California (2014), the Supreme Court generally required a warrant to search digital information on a phone seized during an arrest. In Carpenter v. United States (2018), it required a warrant for the historical cell-site records at issue. These are specific rulings, not a rule that every digital search is identical. The Fourth Amendment also applies to state and local governments through the Fourteenth Amendment.",118,982,fonts.tiny,colors.cream,"left",700)
-  text("MODERN EXAMPLES  ·  RILEY (2014)  ·  CARPENTER (2018)",118,1112,fonts.tiny,colors.gold)
+  text("MODERN EXAMPLES   |   RILEY (2014)   |   CARPENTER (2018)",118,1112,fonts.tiny,colors.gold)
   drawLearnIllustration("phone",868,974,284,142)
 
   text("PICTURES TO THINK WITH",98,1161,fonts.small,colors.red)
-  text("Original illustrations · no external image downloads",98,1187,fonts.tiny,colors.blue)
+  text("Original illustrations  |  no external image downloads",98,1187,fonts.tiny,colors.blue)
   local gallery={
     {"home","A home is a protected space; facts and exceptions still matter."},
     {"scales","Courts weigh the specific circumstances of a search."},
@@ -476,7 +476,7 @@ local function drawLearn()
 
   rounded(96,1396,1084,102,10,{.94,.92,.87})
   text("EXPLORE THE PRIMARY SOURCES",118,1412,fonts.tiny,colors.red)
-  text("National Archives: Bill of Rights and ratification history  ·  U.S. Reports: Verdugo-Urquidez  ·  Riley v. California  ·  Carpenter v. United States  ·  Congress.gov Constitution Annotated",118,1438,fonts.tiny,colors.ink,"left",1027)
+  text("National Archives: Bill of Rights and ratification history   |   U.S. Reports: Verdugo-Urquidez   |   Riley v. California   |   Carpenter v. United States   |   Congress.gov Constitution Annotated",118,1438,fonts.tiny,colors.ink,"left",1027)
 
   love.graphics.pop(); love.graphics.setScissor()
   -- Scroll track and fixed footer controls.
@@ -485,9 +485,9 @@ local function drawLearn()
   local thumbY=LEARN_VIEW_Y+(LEARN_VIEW_H-thumbH)*(learnScroll/LEARN_MAX_SCROLL)
   rounded(1186,thumbY,8,thumbH,4,colors.gold)
   divider(94,615,1092)
-  text("SCROLL OR USE UP / DOWN  ·  PAGE UP / PAGE DOWN  ·  HOME / END",98,630,fonts.tiny,colors.blue)
+  text("SCROLL OR USE UP / DOWN   |   PAGE UP / PAGE DOWN   |   HOME / END",98,630,fonts.tiny,colors.blue)
   rounded(1040,622,138,30,6,colors.navy)
-  text("BACK  ·  ESC",1040,629,fonts.tiny,colors.gold,"center",138)
+  text("BACK   |   ESC",1040,629,fonts.tiny,colors.gold,"center",138)
 end
 local function drawTitle()
   drawBackdrop("intro")
@@ -505,14 +505,14 @@ local function drawTitle()
     text(tostring(i),406,yy+13,fonts.tiny,colors.gold,"center",31)
     text(e[1]:sub(4),450,yy+3,fonts.tiny,colors.ink)
     text(e[2],450,yy+21,fonts.tiny,colors.blue)
-    text("›",850,yy+1,fonts.mid,colors.gold,"center",24)
+    text(">",850,yy+1,fonts.mid,colors.gold,"center",24)
   end
   rounded(500,572,280,35,6,{.13,.16,.21})
-  text("DIFFICULTY  ·  "..DIFFICULTY_NAMES[difficultyMode].."  (D)",510,582,fonts.tiny,colors.cream,"center",260)
-  center("Press 1–5 to choose  ·  D changes difficulty  ·  M toggles music",680,fonts.tiny,colors.muted)
+  text("DIFFICULTY   |   "..DIFFICULTY_NAMES[difficultyMode].."  (D)",510,582,fonts.tiny,colors.cream,"center",260)
+  center("Press 1-5 to choose   |   D changes difficulty   |   M toggles music",680,fonts.tiny,colors.muted)
 end
 local function drawIntro()
-  drawBackdrop("intro"); drawTop("LEVEL  "..casePos.." / "..#caseOrder.."  •  "..DIFFICULTIES[current.tier])
+  drawBackdrop("intro"); drawTop("LEVEL  "..casePos.." / "..#caseOrder.."   |   "..DIFFICULTIES[current.tier])
   drawCharacter(current.witness or "witness-one",18,127,320,485,.95)
   panel(298,104,930,520,15,colors.paper,{.67,.58,.43})
   rounded(298,104,930,7,4,colors.gold)
@@ -532,11 +532,11 @@ local function drawIntro()
   text(difficultyMode==3 and "EXPERT MODE  /  DOCTRINE NOTES HIDDEN" or current.doctrine,330,519,fonts.tiny,colors.blue,"left",835)
   rounded(920,562,275,43,7,colors.navy)
   text("OPEN EVIDENCE DESK  >",932,575,fonts.tiny,colors.gold,"center",250)
-  text("ENTER OR CLICK  ·  REVIEW THE RECORD",18,674,fonts.tiny,colors.muted)
+  text("ENTER OR CLICK   |   REVIEW THE RECORD",18,674,fonts.tiny,colors.muted)
 end
 
 local function drawInvestigation()
-  drawBackdrop("intro"); drawTop("INVESTIGATION  •  LEVEL "..casePos.." / "..#caseOrder)
+  drawBackdrop("intro"); drawTop("INVESTIGATION   |   LEVEL "..casePos.." / "..#caseOrder)
   panel(80,100,1120,550,14,colors.paper,{.67,.58,.43})
   text("THE EVIDENCE DESK",112,117,fonts.head,colors.ink)
   text("Review each record. Use the file to test the witness's account.",114,162,fonts.small,colors.blue)
@@ -559,11 +559,11 @@ local function drawInvestigation()
   local ready=evidenceViewed[1] and evidenceViewed[2] and evidenceViewed[3]
   rounded(847,576,287,41,6,ready and colors.green or {.75,.75,.71})
   text(ready and "CALL THE WITNESS  >" or "REVIEW ALL THREE FILES",847,589,fonts.tiny,colors.white,"center",287)
-  center("< / > change file   ·   Enter marks it reviewed",628,fonts.tiny,colors.blue)
+  center("< / > change file    |    Enter marks it reviewed",628,fonts.tiny,colors.blue)
 end
 
 local function drawCross()
-  drawBackdrop("court"); drawTop("CROSS-EXAMINATION  •  PRESENT YOUR EXHIBIT")
+  drawBackdrop("court"); drawTop("CROSS-EXAMINATION   |   PRESENT YOUR EXHIBIT")
   local witnessArt=current.witness or "witness-one"
   if crossAnswered then
     if crossCorrect then witnessArt=witnessArt..(witnessArt=="witness-one" and "-shocked" or "-angry")
@@ -574,7 +574,7 @@ local function drawCross()
   rounded(324,112,894,6,4,colors.red); text("WITNESS STATEMENT",354,137,fonts.tiny,colors.red)
   text(current.crossSpeaker,354,166,fonts.mid,colors.ink,"left",820)
   text("TESTIMONY",358,221,fonts.tiny,colors.blue)
-  text("“"..current.crossStatement.."”",358,249,fonts.mid,colors.ink,"left",808)
+  text(current.crossStatement,358,249,fonts.mid,colors.ink,"left",808)
   text("SELECT AN EXHIBIT",358,346,fonts.tiny,colors.red)
   text("Which record tests that statement?",520,346,fonts.tiny,colors.blue)
   for i,label in ipairs(EVIDENCE_LABELS) do
@@ -618,7 +618,7 @@ local function submitArgument(choice)
   end
 end
 local function drawArgument()
-  drawBackdrop("court"); drawTop("BUILD YOUR MOTION  •  LINK THE ARGUMENT")
+  drawBackdrop("court"); drawTop("BUILD YOUR MOTION   |   LINK THE ARGUMENT")
   local titles={"1  WHAT DID POLICE DO?","2  WHICH RULE CONTROLS?","3  WHY WAS IT LAWFUL OR UNLAWFUL?","4  WHAT RELIEF FITS?"}
   panel(112,105,1056,510,14,colors.paper,{.67,.58,.43})
   text("ARGUMENT BUILDER",150,122,fonts.head,colors.ink)
@@ -631,7 +631,7 @@ local function drawArgument()
   end
   if argumentAnswered then text(argumentMessage,158,511,fonts.tiny,argumentChoice==argumentCorrectChoice() and colors.green or colors.red,"left",940) end
   rounded(880,553,244,43,9,colors.gold); text(argumentAnswered and "NEXT LINK  >" or "LOCK IN LINK  >",880,565,fonts.tiny,colors.navy,"center",244)
-  center("1–3 choose • Enter confirms / advances",587,fonts.tiny,colors.blue)
+  center("1-3 choose  |  Enter confirms / advances",587,fonts.tiny,colors.blue)
 end
 
 local function drawPractice()
@@ -645,10 +645,10 @@ local function drawPractice()
     rounded(x+10,y+13,38,38,5,i==practiceIndex and colors.navy or {.79,.77,.70})
     text(string.format("%02d",i),x+10,y+24,fonts.tiny,i==practiceIndex and colors.gold or colors.ink,"center",38)
     text(c.title,x+59,y+11,fonts.tiny,colors.ink,"left",248)
-    text(DIFFICULTIES[c.tier].."  ·  "..c.tag,x+59,y+43,fonts.tiny,colors.blue,"left",248)
+    text(DIFFICULTIES[c.tier].."   |   "..c.tag,x+59,y+43,fonts.tiny,colors.blue,"left",248)
   end
   rounded(472,564,336,48,9,colors.gold); text("START SELECTED CASE  >",472,578,fonts.small,colors.navy,"center",336)
-  center("Arrow keys choose • Enter begins • Esc returns",622,fonts.tiny,colors.blue)
+  center("Arrow keys choose  |  Enter begins  |  Esc returns",622,fonts.tiny,colors.blue)
 end
 
 local function drawNotebook()
@@ -676,7 +676,7 @@ local function drawNotebook()
   text("PRACTICE RULING",496,491,fonts.tiny,colors.red)
   text(c.outcome,496,516,fonts.tiny,colors.ink,"left",654)
   rounded(942,590,235,43,6,colors.navy); text("PRACTICE THIS CASE",952,603,fonts.tiny,colors.gold,"center",215)
-  text("UP / DOWN browse • Enter practices",95,615,fonts.tiny,colors.blue)
+  text("UP / DOWN browse  |  Enter practices",95,615,fonts.tiny,colors.blue)
 end
 local function promptLineCount()
   local stage=questionDeck[stagePos]
@@ -690,7 +690,7 @@ local function answerRect(i)
   return 100,top+(i-1)*48,1080,43
 end
 local function drawCourt()
-  drawBackdrop("court"); drawTop("LEVEL "..casePos.." / "..#caseOrder.."  •  Q "..stagePos.." / "..#questionDeck)
+  drawBackdrop("court"); drawTop("LEVEL "..casePos.." / "..#caseOrder.."   |   Q "..stagePos.." / "..#questionDeck)
   -- courtroom bar and two opponents
   set(colors.gold); love.graphics.rectangle("fill",0,346,W,6)
   set(colors.ink); love.graphics.rectangle("fill",0,352,W,114)
@@ -709,7 +709,7 @@ local function drawCourt()
   text(stage.prompt,100,426,fonts.body,colors.ink,"left",1070)
   if hintVisible and difficultyMode~=3 then
     local hintY=426+promptLineCount()*fonts.body:getHeight()+2
-    rounded(100,hintY,1080,18,4,{.89,.91,.88}); text("HINT  ·  "..current.doctrine,112,hintY+1,fonts.tiny,colors.blue,"left",1040)
+    rounded(100,hintY,1080,18,4,{.89,.91,.88}); text("HINT   |   "..current.doctrine,112,hintY+1,fonts.tiny,colors.blue,"left",1040)
   end
   for i,ch in ipairs(stage.choices) do
     local x,y,w,h=answerRect(i); local c=colors.white
@@ -727,7 +727,7 @@ local function drawCourt()
     text(label,126,650,fonts.tiny,colors.white,"left",1030)
     rounded(1080,17,166,43,8,colors.gold); text(stagePos==#questionDeck and "SEE RULING >" or "CONTINUE >",1080,28,fonts.tiny,colors.navy,"center",166)
   else
-    text(difficultyMode==3 and "Expert: hints disabled" or "Choose a response  •  H shows doctrine hint",101,667,fonts.tiny,colors.muted)
+    text(difficultyMode==3 and "Expert: hints disabled" or "Choose a response   |   H shows doctrine hint",101,667,fonts.tiny,colors.muted)
   end
 end
 local function drawRuling()
@@ -747,7 +747,7 @@ local function drawRuling()
     local mark=answerHistory[i]==nil and {.80,.79,.74} or (answerHistory[i] and colors.green or colors.red)
     rounded(x,319,54,14,7,mark)
   end
-  text(caseCorrect.." / "..#questionDeck.." calls  •  exhibit "..(crossCorrect and "proved" or "missed").."  •  argument "..argumentScore.." / 4",390,344,fonts.tiny,colors.ink)
+  text(caseCorrect.." / "..#questionDeck.." calls   |   exhibit "..(crossCorrect and "proved" or "missed").."   |   argument "..argumentScore.." / 4",390,344,fonts.tiny,colors.ink)
   divider(390,386,778)
   text("THE RULING",390,407,fonts.tiny,colors.red)
   local ruling=current.outcome
@@ -755,7 +755,7 @@ local function drawRuling()
   elseif current.merit=="deny" and not good then ruling="EVIDENCE ADMITTED. The record supports this search under the governing rule; test the details and acknowledge the doctrine's limits."
   end
   text(ruling,390,435,fonts.body,colors.ink,"left",740)
-  text("PRECEDENT  ·  "..current.doctrine,390,560,fonts.tiny,colors.blue,"left",740)
+  text("PRECEDENT   |   "..current.doctrine,390,560,fonts.tiny,colors.blue,"left",740)
   rounded(657,648,250,48,7,colors.navy); text(casePos==#caseOrder and "FINAL SCORE  >" or "NEXT CASE  >",671,661,fonts.tiny,colors.gold,"center",222)
 end
 local function drawResults()
@@ -771,7 +771,7 @@ local function drawResults()
   text("Every case can turn on one small fact. Review the doctrine,\nquestion the search, and keep the remedy precise.",384,442,fonts.small,colors.ink,"center",512)
   text(runMode=="daily" and ("DAILY DOCKET  /  "..dailyLabel) or (runMode=="practice" and "SINGLE CASE PRACTICE" or "QUESTION AND ANSWER ORDER SHUFFLED EACH DOCKET"),352,501,fonts.tiny,colors.blue,"center",576)
   rounded(482,536,316,53,7,colors.navy); text("BACK TO MAIN MENU",482,551,fonts.tiny,colors.gold,"center",316)
-  center("Enter or click to continue  ·  Escape returns",624,fonts.tiny,colors.cream)
+  center("Enter or click to continue   |   Escape returns",624,fonts.tiny,colors.cream)
 end
 local function draw()
   love.graphics.push(); love.graphics.translate(ox,oy); love.graphics.scale(scale)

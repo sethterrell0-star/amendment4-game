@@ -3,13 +3,13 @@
 return {
   {
     title="The Midnight Knock", tier=1, tag="HOME / CONSENT", setting="A quiet block after midnight",
-    facts="At 12:14 a.m., officers knock on Mara Vale's door. They have no warrant. She opens it a few inches and says, ‘I don't want you inside.’ Her adult roommate, Eli, walks up behind her and says, ‘Come in, you can look around.’ Officers enter and find a stolen laptop in a shared living room.",
-    item="Laptop found in shared living room", doctrine="Georgia v. Randolph · shared-home consent",
+    facts="At 12:14 a.m., officers knock on Mara Vale's door. They have no warrant. She opens it a few inches and says, 'I don't want you inside.' Her adult roommate, Eli, walks up behind her and says, 'Come in, you can look around.' Officers enter and find a stolen laptop in a shared living room.",
+    item="Laptop found in shared living room", doctrine="Georgia v. Randolph  |  shared-home consent",
     witness="witness-one", merit="suppress", crossSpeaker="Eli, the co-occupant",
     crossStatement="I invited the officers in, and nobody objected while they came through the door.", crossEvidence=1,
     outcome="SUPPRESS THE LAPTOP. Mara was present and expressly refused entry.",
     questions={
-      {prompt="Officer Reyes says Eli ‘invited us in.’ What do you establish first?", correct=1, choices={
+      {prompt="Officer Reyes says Eli 'invited us in.' What do you establish first?", correct=1, choices={
         {text="Mara was physically present and expressly refused entry.",why="Exactly. Her presence and direct refusal are the key facts under Randolph."},
         {text="Eli paid more rent, so his permission controls.",why="Who pays more rent is not the constitutional test."},
         {text="The officers never showed Mara a warrant.",why="A warrant matters, but the immediate dispute is conflicting occupant consent."}}},
@@ -30,7 +30,7 @@ return {
   {
     title="Pocket-Sized Search", tier=2, tag="TRAFFIC / DIGITAL PRIVACY", setting="A roadside stop in the rain",
     facts="After a valid arrest for driving with a suspended license, an officer finds a smartphone in Devon's pocket. Without a warrant, she scrolls through messages and photos. She finds a thread about a recent robbery. There is no emergency and no attempt to remotely wipe the device.",
-    item="Messages and photos copied from phone", doctrine="Riley v. California · digital data incident to arrest",
+    item="Messages and photos copied from phone", doctrine="Riley v. California  |  digital data incident to arrest",
     witness="witness-two", merit="suppress", crossSpeaker="Officer Vale",
     crossStatement="I only secured Devon's phone after the arrest; I never looked through its contents.", crossEvidence=2,
     outcome="SUPPRESS THE PHONE CONTENTS. Riley generally requires a warrant to search phone data.",
@@ -56,7 +56,7 @@ return {
   {
     title="The Apartment Signal", tier=3, tag="LOCATION / WARRANT", setting="A month of quiet pings",
     facts="Investigators obtain 30 days of historical cell-site location information for Niko's phone from his carrier. They have no warrant. The records place Niko near a series of warehouse break-ins. Police use the data to get a warrant for his apartment, where they find stolen watches.",
-    item="Thirty days of historical cell-site location data", doctrine="Carpenter v. United States · historical CSLI",
+    item="Thirty days of historical cell-site location data", doctrine="Carpenter v. United States  |  historical CSLI",
     witness="witness-one", merit="suppress", crossSpeaker="Carrier records analyst",
     crossStatement="These records are just billing entries; they cannot trace a person's movements over time.", crossEvidence=1,
     outcome="SUPPRESS THE WATCHES IF THE APARTMENT WARRANT DEPENDED ON THE UNLAWFUL LOCATION RECORDS.",
@@ -82,7 +82,7 @@ return {
   {
     title="The Bus Stop Patdown", tier=1, tag="STREET / REASONABLE SUSPICION", setting="A crowded station at dusk",
     facts="An officer sees Jules step off a bus and look around nervously. Jules wears a bulky jacket. The officer has no report of a crime and sees no weapon-like movement. He stops Jules and pats down every pocket, finding a small bag of pills.",
-    item="Pills found during a full pocket search", doctrine="Terry v. Ohio · stop and protective frisk",
+    item="Pills found during a full pocket search", doctrine="Terry v. Ohio  |  stop and protective frisk",
     witness="witness-two", merit="suppress", crossSpeaker="Officer Grant",
     crossStatement="Jules was acting nervous, so I had enough to search every pocket for evidence.", crossEvidence=1,
     outcome="SUPPRESS THE PILLS. The stop lacks specific facts, and the frisk exceeded its protective scope.",
@@ -108,7 +108,7 @@ return {
   {
     title="The Specific Warrant", tier=1, tag="HOME / WARRANT SCOPE", setting="A search with clear boundaries",
     facts="After finding probable cause, a neutral judge signs a warrant naming Apartment 4B and a stolen camera with its serial number. Officers execute it at the listed address, knock and announce, then look in a kitchen drawer large enough to hold the camera. Inside they find the camera with the matching serial number. They do not search beyond the warrant's scope.",
-    item="Camera found inside the place and scope named by warrant", doctrine="Fourth Amendment · probable cause · particularity · scope",
+    item="Camera found inside the place and scope named by warrant", doctrine="Fourth Amendment  |  probable cause  |  particularity  |  scope",
     witness="witness-one", merit="deny", crossSpeaker="Officer Reyes",
     crossStatement="We searched only Apartment 4B and only for the camera listed in the warrant.", crossEvidence=1,
     outcome="MOTION DENIED. The officers used a valid, particular warrant and stayed within its scope.",
@@ -134,7 +134,7 @@ return {
   {
     title="The Extra Twelve Minutes", tier=2, tag="TRAFFIC / DETENTION", setting="A traffic stop that would not end",
     facts="An officer stops Ren for a broken tail light. She issues a warning, returns Ren's license and papers, and says Ren is free to go. With no new facts suggesting a crime, she orders Ren to wait twelve minutes while a drug dog arrives. The dog alerts and officers search the car.",
-    item="Evidence found after the dog sniff", doctrine="Rodriguez v. United States · traffic-stop duration",
+    item="Evidence found after the dog sniff", doctrine="Rodriguez v. United States  |  traffic-stop duration",
     witness="witness-two", merit="suppress", crossSpeaker="Officer Lin",
     crossStatement="The dog arrived after I returned Ren's papers and told Ren they were free to leave.", crossEvidence=1,
     outcome="SUPPRESS THE EVIDENCE THAT FOLLOWED THE UNLAWFUL EXTENSION OF THE TRAFFIC STOP.",
@@ -160,7 +160,7 @@ return {
   {
     title="Canvas in the Trunk", tier=2, tag="VEHICLE / PROBABLE CAUSE", setting="A credible report and a roadside stop",
     facts="A reliable witness gives police specific, recently verified details that a stolen painting is inside a blue van, including its route and a distinctive frame. Officers stop the van on the highway, confirm details through the window, and have probable cause to believe the painting is in the trunk. Without a warrant, they open a portfolio large enough to hold it and find the painting.",
-    item="Painting found inside a container in the van", doctrine="Carroll v. United States · automobile exception · scope",
+    item="Painting found inside a container in the van", doctrine="Carroll v. United States  |  automobile exception  |  scope",
     witness="witness-one", merit="deny", crossSpeaker="Officer Cole",
     crossStatement="The portfolio was large enough to hold the painting described in the verified report.", crossEvidence=2,
     outcome="MOTION DENIED. Probable cause supported this vehicle search, and the portfolio could hold the painting.",
@@ -186,7 +186,7 @@ return {
   {
     title="The Wrong Door", tier=3, tag="WARRANT / PARTICULARITY", setting="A number off on the warrant",
     facts="A valid warrant names 44 Pine Street, Apartment 4B, and stolen watches. The building has identical neighboring units. Officers' paperwork and the door placard both say 4D, but they force open 4D's door and search it for the watches. The resident of 4D has no connection to the investigation.",
-    item="Items found inside the wrong apartment", doctrine="Maryland v. Garrison · warrant execution · reasonable mistake",
+    item="Items found inside the wrong apartment", doctrine="Maryland v. Garrison  |  warrant execution  |  reasonable mistake",
     witness="witness-two", merit="suppress", crossSpeaker="Officer Moss",
     crossStatement="The warrant named 4B, but our paperwork and the placard at the door said 4D.", crossEvidence=1,
     outcome="SUPPRESS EVIDENCE FOUND IN APARTMENT 4D. It was outside the warrant's scope.",
@@ -212,7 +212,7 @@ return {
   {
     title="The 3 A.M. Entry", tier=3, tag="HOME / ARREST WARRANT", setting="A quiet house before sunrise",
     facts="Police believe Kai committed a felony and see him enter his own home. They have no arrest warrant or search warrant. Officers force the front door to arrest him. No one invited them in, and there is no emergency, hot pursuit, or immediate threat.",
-    item="Evidence observed after the warrantless home entry", doctrine="Payton v. New York · home entry to make an arrest",
+    item="Evidence observed after the warrantless home entry", doctrine="Payton v. New York  |  home entry to make an arrest",
     witness="witness-one", merit="suppress", crossSpeaker="Officer Chen",
     crossStatement="We entered Kai's home to arrest him without an arrest warrant, consent, or emergency.", crossEvidence=1,
     outcome="SUPPRESS EVIDENCE OBTAINED THROUGH THE UNJUSTIFIED WARRANTLESS ENTRY, SUBJECT TO EXCEPTIONS AND THE FULL RECORD.",
@@ -238,7 +238,7 @@ return {
   {
     title="Search After Arrest", tier=4, tag="VEHICLE / SEARCH INCIDENT TO ARREST", setting="A traffic arrest and a locked patrol car",
     facts="After arresting Morgan for driving with a suspended license, officers handcuff Morgan and secure them in a patrol car. They search the passenger compartment of Morgan's vehicle and open a backpack, hoping to find evidence of an unrelated burglary. There is no reason to believe evidence of the license offense is in the vehicle, and no other exception applies.",
-    item="Evidence found in a backpack inside the passenger compartment", doctrine="Arizona v. Gant · vehicle search incident to arrest",
+    item="Evidence found in a backpack inside the passenger compartment", doctrine="Arizona v. Gant  |  vehicle search incident to arrest",
     witness="witness-two", merit="suppress", crossSpeaker="Officer Dale",
     crossStatement="Morgan was handcuffed in our patrol car, and the arrest was only for a suspended license.", crossEvidence=1,
     outcome="SUPPRESS THE BACKPACK EVIDENCE. NEITHER GANT BASIS FOR A VEHICLE SEARCH INCIDENT TO ARREST IS PRESENT.",
@@ -263,8 +263,8 @@ return {
   },
   {
     title="The Paper Bag", tier=4, tag="CONSENT / SEARCH SCOPE", setting="A consent search on the shoulder",
-    facts="During a lawful traffic stop, an officer says, ‘I suspect you have narcotics. May I search your car?’ Lee replies, ‘Go ahead.’ Lee does not limit the consent. In the passenger area, the officer finds an ordinary paper bag large enough to hold narcotics and opens it. There is no claim of coercion or revocation.",
-    item="Narcotics found inside the paper bag", doctrine="Florida v. Jimeno · objective scope of consent",
+    facts="During a lawful traffic stop, an officer says, 'I suspect you have narcotics. May I search your car?' Lee replies, 'Go ahead.' Lee does not limit the consent. In the passenger area, the officer finds an ordinary paper bag large enough to hold narcotics and opens it. There is no claim of coercion or revocation.",
+    item="Narcotics found inside the paper bag", doctrine="Florida v. Jimeno  |  objective scope of consent",
     witness="witness-two", merit="deny", crossSpeaker="Officer Park",
     crossStatement="Lee told me to search the car for narcotics and did not limit the search to any area.", crossEvidence=1,
     outcome="MOTION DENIED ON THESE FACTS. A REASONABLE PERSON COULD UNDERSTAND THE UNLIMITED CAR SEARCH FOR NARCOTICS TO INCLUDE THIS BAG.",
@@ -290,7 +290,7 @@ return {
   {
     title="The Covered Motorcycle", tier=4, tag="HOME / VEHICLE EXCEPTION", setting="A tarp beside the house",
     facts="Police have probable cause to believe a motorcycle parked under a tarp on a home's enclosed side patio is stolen. The patio is part of the home's curtilage. Without a warrant, consent, or exigency, an officer walks onto the patio and lifts the tarp to inspect the motorcycle.",
-    item="Information and evidence obtained by entering the patio and uncovering the motorcycle", doctrine="Collins v. Virginia · automobile exception and curtilage",
+    item="Information and evidence obtained by entering the patio and uncovering the motorcycle", doctrine="Collins v. Virginia  |  automobile exception and curtilage",
     witness="witness-one", merit="suppress", crossSpeaker="Officer Rhodes",
     crossStatement="I had probable cause to inspect the motorcycle, so I walked into the enclosed patio without a warrant.", crossEvidence=3,
     outcome="SUPPRESS EVIDENCE GAINED THROUGH THE WARRANTLESS CURTILAGE ENTRY, SUBJECT TO ANY INDEPENDENT EXCEPTION OR SOURCE.",
