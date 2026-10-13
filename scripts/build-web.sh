@@ -7,6 +7,8 @@ rm -f lovegame/fourth-counsel.love
 (cd lovegame && zip -qr fourth-counsel.love conf.lua main.lua case_data.lua assets)
 rm -rf docs/* docs/.[!.]* docs/..?* 2>/dev/null || true
 npx love.js lovegame/fourth-counsel.love docs -c -t "Fourth Counsel"
+# Keep generated JavaScript diffs stable across love.js versions/platforms.
+sed -i 's/[[:space:]]*$//' docs/game.js
 touch docs/.nojekyll
 cat >> docs/theme/love.css <<'CSS'
 

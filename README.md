@@ -4,7 +4,7 @@ A courtroom visual novel about the Fourth Amendment. Its 12 cases cover four ris
 
 Choose a full campaign, a date-seeded daily docket, single-case practice, or the doctrine notebook. Study mode shows free hints, Standard deducts a point when a used hint leads to a correct answer, and Expert disables hints. Case order is shuffled inside each difficulty band; questions and answer positions are shuffled each run. The daily docket uses the UTC date as its seed, so players get the same shuffle that day.
 
-The game is written in **LÖVE 11.4 / Lua**. It also ships as a static browser build using love.js and WebAssembly. No server code or runtime network requests are needed.
+The game is written in **LÖVE 11.4 / Lua**. It also ships as a static browser build using love.js and WebAssembly. No server-side code or external services are needed; the browser loads the bundled game files from the same site.
 
 ## Play in a browser
 
@@ -23,8 +23,6 @@ Install [LÖVE](https://love2d.org/) and run the project folder:
 ```sh
 love lovegame
 ```
-
-The `.love` source package is also at `lovegame/fourth-counsel.love`.
 
 ## Controls
 
