@@ -54,8 +54,21 @@ local function imageFit(img,x,y,w,h,alpha)
 end
 local function loadArt()
   local names={"counsel-neutral","counsel-shout","counsel-surprised","prosecutor-neutral","prosecutor-angry","prosecutor-surprised","witness-one","witness-one-doubt","witness-one-shocked","witness-two","witness-two-worry","witness-two-angry"}
-  for _,n in ipairs(names) do local ok,v=pcall(love.graphics.newImage,"assets/characters/custom/"..n..".png"); if ok then art[n]=v; v:setFilter("linear","linear") end end
-  for _,n in ipairs({"courthouse","courtroom","police-car"}) do local ok,v=pcall(love.graphics.newImage,"assets/"..n..".jpg"); if ok then photos[n]=v; v:setFilter("linear","linear") end end
+  local function loadImage(paths)
+    for _,path in ipairs(paths) do
+      local infoOK,info=pcall(love.filesystem.getInfo,path)
+      if infoOK and info then
+        local imageOK,img=pcall(love.graphics.newImage,path)
+        if imageOK and img then img:setFilter("linear","linear"); return img end
+      end
+    end
+  end
+  for _,n in ipairs(names) do
+    art[n]=loadImage({"assets/characters/custom/"..n..".png","assets/characters/"..n..".png"})
+  end
+  for _,n in ipairs({"courthouse","courtroom","police-car"}) do
+    photos[n]=loadImage({"assets/"..n..".jpg"})
+  end
 end
 local function loadFonts()
   fonts.tiny=love.graphics.newFont(13); fonts.small=love.graphics.newFont(17); fonts.body=love.graphics.newFont(20)
