@@ -274,7 +274,12 @@ end
 
 local function drawCross()
   drawBackdrop("court"); drawTop("CROSS-EXAMINATION  •  PRESENT YOUR EXHIBIT")
-  drawCharacter(current.witness or "witness-one",60,120,335,470,.98)
+  local witnessArt=current.witness or "witness-one"
+  if crossAnswered then
+    if crossCorrect then witnessArt=witnessArt..(witnessArt=="witness-one" and "-shocked" or "-angry")
+    else witnessArt=witnessArt..(witnessArt=="witness-one" and "-doubt" or "-worry") end
+  end
+  drawCharacter(witnessArt,60,120,335,470,.98)
   rounded(324,112,894,482,16,colors.paper)
   rounded(324,112,894,58,14,colors.red); text("WITNESS: "..current.crossSpeaker,348,129,fonts.small,colors.white)
   text("TESTIMONY",358,198,fonts.small,colors.blue)
@@ -462,7 +467,7 @@ local function advance()
   elseif screen=="cross" then
     if not crossAnswered then
       crossAnswered=true; crossCorrect=crossSelected==current.crossEvidence
-      if crossCorrect then score=score+1; crossFeedback="Exhibit admitted. The record impeaches the witness's statement."
+      if crossCorrect then score=score+1; crossFeedback="Exhibit admitted. You tested the witness's account against the record."
       else crossFeedback="This exhibit does not test the statement. The stronger exhibit is highlighted." end
     else beginQuestions() end
   elseif screen=="argument" then submitArgument(argumentChoice)
