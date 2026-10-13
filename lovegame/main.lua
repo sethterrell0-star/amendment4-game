@@ -15,6 +15,7 @@ local practiceIndex, dailyLabel = 1, ""
 local argumentStep, argumentScore, argumentAnswered, argumentChoice = 1, 0, false, 1
 local argumentMessage = ""
 local animTime = 0
+local learnScroll = 0
 local scale, ox, oy = 1, 0, 0
 local DIFFICULTY_NAMES = {"STUDY", "STANDARD", "EXPERT"}
 local EVIDENCE_LABELS = {"CASE FILE", "ITEM AT ISSUE", "PRECEDENT"}
@@ -299,27 +300,158 @@ local function drawLogo(y)
   set(colors.gold); love.graphics.polygon("fill",640,y+142,646,y+147,640,y+152,634,y+147)
   center("THE PEOPLE v. YOUR JUDGMENT",y+161,fonts.tiny,colors.muted)
 end
+local LEARN_VIEW_Y, LEARN_VIEW_H, LEARN_MAX_SCROLL = 99, 507, 892
+local function drawLearnIllustration(kind,x,y,w,h)
+  rounded(x,y,w,h,10,{.88,.86,.79})
+  set({.80,.77,.69},.8); love.graphics.rectangle("line",x,y,w,h,10)
+  local base=y+h-20
+  set({.77,.72,.61}); love.graphics.rectangle("fill",x+12,base,w-24,2)
+  if kind=="colonial" then
+    -- A quiet, original illustration of a colonial house and a broad search warrant.
+    set({.72,.65,.51}); love.graphics.polygon("fill",x+31,base-77,x+84,base-120,x+137,base-77)
+    set({.70,.69,.59}); love.graphics.rectangle("fill",x+39,base-77,90,75)
+    set({.30,.39,.40}); love.graphics.rectangle("fill",x+52,base-65,21,22,2)
+    set({.30,.39,.40}); love.graphics.rectangle("fill",x+94,base-65,21,22,2)
+    set({.42,.31,.24}); love.graphics.rectangle("fill",x+76,base-40,18,38)
+    set({.82,.72,.53}); love.graphics.circle("fill",x+227,base-79,35)
+    set({.97,.94,.86}); love.graphics.rectangle("fill",x+207,base-102,39,48,3)
+    set({.55,.31,.22}); love.graphics.rectangle("fill",x+213,base-93,27,3,1)
+    for i=0,2 do set({.64,.62,.56}); love.graphics.rectangle("fill",x+213,base-84+i*8,25,2,1) end
+    set(colors.gold); love.graphics.circle("fill",x+235,base-64,6)
+  elseif kind=="warrant" then
+    set({.98,.96,.89}); love.graphics.rectangle("fill",x+22,y+17,w-44,h-34,5)
+    set({.72,.66,.53}); love.graphics.rectangle("line",x+22,y+17,w-44,h-34,5)
+    set(colors.red,.9); love.graphics.circle("line",x+w-51,y+52,19); love.graphics.circle("line",x+w-51,y+52,14)
+    text("WARRANT",x+39,y+29,fonts.tiny,colors.blue)
+    for i=0,3 do set({.70,.69,.64}); love.graphics.rectangle("fill",x+39,y+56+i*12,w-116-(i%2)*34,2,1) end
+    set(colors.gold); love.graphics.polygon("fill",x+w-51,y+39,x+w-46,y+50,x+w-51,y+61,x+w-56,y+50)
+  elseif kind=="phone" then
+    rounded(x+44,y+12,w-88,h-24,14,{.14,.19,.23})
+    rounded(x+52,y+22,w-104,h-44,9,{.82,.87,.83})
+    set({.57,.68,.64}); love.graphics.setLineWidth(3)
+    love.graphics.line(x+73,y+64,x+112,y+47,x+143,y+76,x+188,y+51,x+217,y+67)
+    for _,p in ipairs({{73,64},{112,47},{143,76},{188,51},{217,67}}) do set(colors.red); love.graphics.circle("fill",x+p[1],y+p[2],4) end
+    set(colors.gold); love.graphics.circle("fill",x+w/2,y+h-25,4)
+    set(colors.blue); love.graphics.rectangle("fill",x+w-76,y+h-52,30,22,5)
+    love.graphics.polygon("fill",x+w-69,y+h-52,x+w-66,y+h-64,x+w-57,y+h-64,x+w-54,y+h-52)
+  elseif kind=="home" then
+    set({.60,.67,.64}); love.graphics.polygon("fill",x+30,y+85,x+w/2,y+28,x+w-30,y+85)
+    set({.93,.91,.85}); love.graphics.rectangle("fill",x+48,y+82,w-96,h-101)
+    set({.41,.48,.47}); love.graphics.rectangle("fill",x+w/2-16,y+98,32,h-117,2)
+    set(colors.gold); love.graphics.circle("fill",x+w/2+8,y+122,3)
+    set(colors.red); love.graphics.circle("fill",x+w-55,y+67,22)
+    set(colors.paper); love.graphics.polygon("fill",x+w-55,y+53,x+w-44,y+58,x+w-47,y+72,x+w-55,y+79,x+w-63,y+72,x+w-66,y+58)
+  elseif kind=="scales" then
+    set(colors.gold); love.graphics.setLineWidth(4)
+    love.graphics.line(x+w/2,y+31,x+w/2,y+h-36); love.graphics.line(x+w/2-48,y+52,x+w/2+48,y+52)
+    love.graphics.line(x+w/2-38,y+53,x+w/2-52,y+88); love.graphics.line(x+w/2-38,y+53,x+w/2-23,y+88)
+    love.graphics.line(x+w/2+38,y+53,x+w/2+23,y+88); love.graphics.line(x+w/2+38,y+53,x+w/2+52,y+88)
+    love.graphics.arc("line","open",x+w/2-52,y+83,18,0,math.pi); love.graphics.arc("line","open",x+w/2+52,y+83,18,0,math.pi)
+    love.graphics.line(x+w/2-20,y+h-36,x+w/2+20,y+h-36)
+    love.graphics.line(x+w/2-32,y+h-30,x+w/2+32,y+h-30)
+  end
+end
+local function drawLearn()
+  drawBackdrop("intro"); drawTop("LEARN  /  AMENDMENT IV")
+  panel(70,88,1140,574,14,colors.paper,{.67,.58,.43})
+  -- Fixed title and help; the lesson itself scrolls independently.
+  text("THE FOURTH AMENDMENT",96,99,fonts.head,colors.ink)
+  text("A guide to searches, seizures, and the rules that protect privacy.",98,146,fonts.tiny,colors.blue)
+  divider(96,169,1084)
+  love.graphics.setScissor(92,LEARN_VIEW_Y,1090,LEARN_VIEW_H)
+  love.graphics.push(); love.graphics.translate(0,-learnScroll)
+
+  rounded(96,183,1084,102,10,{.12,.17,.21})
+  text("RATIFIED DECEMBER 15, 1791",118,199,fonts.tiny,colors.gold)
+  text("One of the first ten amendments in the Bill of Rights.",118,222,fonts.small,colors.cream)
+  text("It protects people from unreasonable government searches and seizures.",118,249,fonts.tiny,colors.muted)
+  drawLearnIllustration("scales",1007,192,145,84)
+
+  rounded(96,300,1084,194,10,{.94,.92,.87})
+  text("WHY WAS IT PROPOSED?",118,316,fonts.small,colors.red)
+  text("Before independence, British officers used writs of assistance and broad general warrants to search for smuggled goods. These orders could leave the place and objects to be searched largely to an officer's discretion. Colonists objected to that kind of arbitrary search. During the debates over ratifying the Constitution, several states called for written protections; James Madison introduced amendments in the First Congress.",118,345,fonts.tiny,colors.ink,"left",688)
+  text("HISTORICAL CONTEXT  ·  NATIONAL ARCHIVES; U.S. REPORTS",118,465,fonts.tiny,colors.blue)
+  drawLearnIllustration("colonial",843,323,310,151)
+
+  rounded(96,508,1084,249,10,{.94,.92,.87})
+  text("WHAT DID IT CHANGE?",118,524,fonts.small,colors.red)
+  text("The Constitution's rule",118,550,fonts.tiny,colors.blue)
+  text("The right of the people to be secure in their persons, houses, papers, and effects, against unreasonable searches and seizures, shall not be violated, and no Warrants shall issue, but upon probable cause, supported by Oath or affirmation, and particularly describing the place to be searched, and the persons or things to be seized.",118,570,fonts.tiny,colors.ink,"left",680)
+  divider(118,681,679)
+  text("A warrant must be grounded in probable cause and describe the search with particularity. Courts also recognize exceptions to the warrant requirement; every search is judged by the facts and applicable doctrine.",118,693,fonts.tiny,colors.blue,"left",680)
+  drawLearnIllustration("warrant",843,537,310,151)
+
+  text("FOUR IDEAS TO REMEMBER",98,778,fonts.small,colors.red)
+  local ideas={
+    {"01  WHO IS PROTECTED","People and their private spaces and belongings."},
+    {"02  REASONABLENESS","The facts and setting matter to the analysis."},
+    {"03  WARRANT DETAILS","Probable cause, oath, and particular description."},
+    {"04  LIMITED EXCEPTIONS","Some searches may proceed without a warrant."}
+  }
+  for i,item in ipairs(ideas) do
+    local xx=96+(i-1)*274
+    rounded(xx,811,260,105,9,{.94,.92,.87})
+    rounded(xx+14,825,33,27,5,colors.navy)
+    text(string.sub(item[1],1,2),xx+14,831,fonts.tiny,colors.gold,"center",33)
+    text(string.sub(item[1],5),xx+55,827,fonts.tiny,colors.red,"left",191)
+    text(item[2],xx+16,864,fonts.tiny,colors.ink,"left",228)
+  end
+
+  rounded(96,936,1084,201,10,{.12,.17,.21})
+  text("WHY IT STILL MATTERS",118,952,fonts.small,colors.gold)
+  text("The same protection applies to modern evidence, including phones and location records. In Riley v. California (2014), the Supreme Court generally required a warrant to search digital information on a phone seized during an arrest. In Carpenter v. United States (2018), it required a warrant for the historical cell-site records at issue. These are specific rulings, not a rule that every digital search is identical. The Fourth Amendment also applies to state and local governments through the Fourteenth Amendment.",118,982,fonts.tiny,colors.cream,"left",700)
+  text("MODERN EXAMPLES  ·  RILEY (2014)  ·  CARPENTER (2018)",118,1112,fonts.tiny,colors.gold)
+  drawLearnIllustration("phone",868,974,284,142)
+
+  text("PICTURES TO THINK WITH",98,1161,fonts.small,colors.red)
+  text("Original illustrations · no external image downloads",98,1187,fonts.tiny,colors.blue)
+  local gallery={
+    {"home","A home is a protected space; facts and exceptions still matter."},
+    {"scales","Courts weigh the specific circumstances of a search."},
+    {"phone","Digital records can reveal a detailed picture of a person's life."}
+  }
+  for i,item in ipairs(gallery) do
+    local xx=96+(i-1)*365
+    drawLearnIllustration(item[1],xx,1211,345,126)
+    text(item[2],xx+3,1344,fonts.tiny,colors.ink,"left",338)
+  end
+
+  rounded(96,1396,1084,102,10,{.94,.92,.87})
+  text("EXPLORE THE PRIMARY SOURCES",118,1412,fonts.tiny,colors.red)
+  text("National Archives: Bill of Rights and ratification history  ·  U.S. Reports: Verdugo-Urquidez  ·  Riley v. California  ·  Carpenter v. United States  ·  Congress.gov Constitution Annotated",118,1438,fonts.tiny,colors.ink,"left",1027)
+
+  love.graphics.pop(); love.graphics.setScissor()
+  -- Scroll track and fixed footer controls.
+  rounded(1188,LEARN_VIEW_Y,4,LEARN_VIEW_H,2,{.83,.81,.76})
+  local thumbH=math.max(48,LEARN_VIEW_H*LEARN_VIEW_H/(1498-LEARN_VIEW_Y))
+  local thumbY=LEARN_VIEW_Y+(LEARN_VIEW_H-thumbH)*(learnScroll/LEARN_MAX_SCROLL)
+  rounded(1186,thumbY,8,thumbH,4,colors.gold)
+  divider(94,615,1092)
+  text("SCROLL OR USE ↑ / ↓  ·  PAGE UP / PAGE DOWN  ·  HOME / END",98,630,fonts.tiny,colors.blue)
+  rounded(1040,622,138,30,6,colors.navy)
+  text("BACK  ·  ESC",1040,629,fonts.tiny,colors.gold,"center",138)
+end
 local function drawTitle()
   drawBackdrop("intro")
   drawCharacter("counsel-neutral",18,150,300,510,.96)
   drawCharacter("prosecutor-neutral",962,142,290,520,.94)
   drawLogo(55)
-  panel(365,257,550,397,15,{.085,.115,.17},{.65,.56,.40})
-  text("SELECT A DOCKET",405,275,fonts.small,colors.gold)
-  text("Choose how you want to take the case.",405,300,fonts.tiny,colors.muted)
-  local entries={{"1  CAMPAIGN","Twelve escalating cases"},{"2  DAILY DOCKET","Same randomized docket worldwide"},{"3  PRACTICE","Choose a case and drill the rule"},{"4  DOCTRINE NOTEBOOK","Review cases, rules and outcomes"}}
+  panel(365,247,550,412,15,{.085,.115,.17},{.65,.56,.40})
+  text("SELECT A DOCKET",405,264,fonts.small,colors.gold)
+  text("Choose how you want to take the case.",405,288,fonts.tiny,colors.muted)
+  local entries={{"1  CAMPAIGN","Twelve escalating cases"},{"2  DAILY DOCKET","Same randomized docket worldwide"},{"3  PRACTICE","Choose a case and drill the rule"},{"4  DOCTRINE NOTEBOOK","Review cases, rules and outcomes"},{"5  LEARN","History, protections and impact today"}}
   for i,e in ipairs(entries) do
-    local yy=328+(i-1)*61
-    rounded(397,yy,486,53,8,{.94,.92,.86})
-    rounded(408,yy+8,36,36,6,colors.navy)
-    text(tostring(i),408,yy+15,fonts.tiny,colors.gold,"center",36)
-    text(e[1]:sub(4),458,yy+6,fonts.small,colors.ink)
-    text(e[2],458,yy+29,fonts.tiny,colors.blue)
-    text("›",850,yy+6,fonts.mid,colors.gold,"center",24)
+    local yy=313+(i-1)*49
+    rounded(397,yy,486,43,7,{.94,.92,.86})
+    rounded(406,yy+6,31,31,5,colors.navy)
+    text(tostring(i),406,yy+13,fonts.tiny,colors.gold,"center",31)
+    text(e[1]:sub(4),450,yy+3,fonts.tiny,colors.ink)
+    text(e[2],450,yy+21,fonts.tiny,colors.blue)
+    text("›",850,yy+1,fonts.mid,colors.gold,"center",24)
   end
-  rounded(500,584,280,39,7,{.13,.16,.21})
-  text("DIFFICULTY  ·  "..DIFFICULTY_NAMES[difficultyMode],512,595,fonts.tiny,colors.cream,"center",256)
-  center("Press 1–4 to choose  ·  D changes difficulty",680,fonts.tiny,colors.muted)
+  rounded(500,572,280,35,6,{.13,.16,.21})
+  text("DIFFICULTY  ·  "..DIFFICULTY_NAMES[difficultyMode].."  (D)",510,582,fonts.tiny,colors.cream,"center",260)
+  center("Press 1–5 to choose  ·  D changes difficulty",680,fonts.tiny,colors.muted)
 end
 local function drawIntro()
   drawBackdrop("intro"); drawTop("LEVEL  "..casePos.." / "..#caseOrder.."  •  "..DIFFICULTIES[current.tier])
@@ -585,7 +717,7 @@ local function drawResults()
 end
 local function draw()
   love.graphics.push(); love.graphics.translate(ox,oy); love.graphics.scale(scale)
-  if screen=="title" then drawTitle() elseif screen=="intro" then drawIntro() elseif screen=="investigation" then drawInvestigation() elseif screen=="cross" then drawCross() elseif screen=="argument" then drawArgument() elseif screen=="practice" then drawPractice() elseif screen=="notebook" then drawNotebook() elseif screen=="play" then drawCourt() elseif screen=="ruling" then drawRuling() else drawResults() end
+  if screen=="title" then drawTitle() elseif screen=="learn" then drawLearn() elseif screen=="intro" then drawIntro() elseif screen=="investigation" then drawInvestigation() elseif screen=="cross" then drawCross() elseif screen=="argument" then drawArgument() elseif screen=="practice" then drawPractice() elseif screen=="notebook" then drawNotebook() elseif screen=="play" then drawCourt() elseif screen=="ruling" then drawRuling() else drawResults() end
   love.graphics.pop()
 end
 local function advance()
@@ -619,7 +751,13 @@ function love.keypressed(key)
     elseif key=="2" then beginDaily()
     elseif key=="3" then screen="practice"
     elseif key=="4" then screen="notebook"
+    elseif key=="5" then screen="learn"; learnScroll=0
     elseif key=="return" or key=="space" then beginGame() end
+  elseif screen=="learn" then
+    if key=="down" or key=="pagedown" then learnScroll=math.min(LEARN_MAX_SCROLL,learnScroll+(key=="pagedown" and 360 or 72))
+    elseif key=="up" or key=="pageup" then learnScroll=math.max(0,learnScroll-(key=="pageup" and 360 or 72))
+    elseif key=="home" then learnScroll=0
+    elseif key=="end" then learnScroll=LEARN_MAX_SCROLL end
   elseif screen=="intro" or screen=="ruling" then
     if key=="return" or key=="space" or key=="right" then advance() end
   elseif screen=="investigation" then
@@ -672,11 +810,17 @@ function love.mousepressed(mx,my,button)
   if button~=1 then return end
   local x,y=(mx-ox)/scale,(my-oy)/scale
   if screen=="title" then
-    for i=1,4 do local yy=328+(i-1)*61; if x>=397 and x<=883 and y>=yy and y<=yy+53 then
-        if i==1 then beginGame() elseif i==2 then beginDaily() elseif i==3 then screen="practice" else screen="notebook" end
+    for i=1,5 do local yy=313+(i-1)*49; if x>=397 and x<=883 and y>=yy and y<=yy+43 then
+        if i==1 then beginGame() elseif i==2 then beginDaily() elseif i==3 then screen="practice" elseif i==4 then screen="notebook" else screen="learn"; learnScroll=0 end
         return
     end end
-    if x>=500 and x<=780 and y>=584 and y<=623 then difficultyMode=difficultyMode%3+1 end
+    if x>=500 and x<=780 and y>=572 and y<=607 then difficultyMode=difficultyMode%3+1 end
+  elseif screen=="learn" then
+    if x>=1040 and x<=1178 and y>=622 and y<=652 then screen="title"
+    elseif x>=92 and x<=1180 and y>=LEARN_VIEW_Y and y<=LEARN_VIEW_Y+LEARN_VIEW_H then
+      if y<LEARN_VIEW_Y+36 then learnScroll=math.max(0,learnScroll-120)
+      elseif y>LEARN_VIEW_Y+LEARN_VIEW_H-36 then learnScroll=math.min(LEARN_MAX_SCROLL,learnScroll+120) end
+    end
   elseif screen=="intro" then startCase()
   elseif screen=="investigation" then
     for i=1,3 do local tx=114+(i-1)*350; if x>=tx and x<=tx+322 and y>=207 and y<=261 then evidenceViewed[i]=true; evidenceTab=i; return end end
@@ -705,4 +849,7 @@ function love.mousepressed(mx,my,button)
       if x>=1080 and x<=1246 and y>=17 and y<=60 then finishAnswer(selected) end
     else for i=1,3 do local ax,ay,aw,ah=answerRect(i); if x>=ax and x<=ax+aw and y>=ay and y<=ay+ah then finishAnswer(i); return end end end
   end
+end
+function love.wheelmoved(_,y)
+  if screen=="learn" then learnScroll=math.max(0,math.min(LEARN_MAX_SCROLL,learnScroll-y*84)) end
 end

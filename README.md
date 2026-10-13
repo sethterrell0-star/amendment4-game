@@ -28,12 +28,12 @@ The `.love` source package is also at `lovegame/fourth-counsel.love`.
 
 ## Controls
 
-- On the title screen, press `1` for campaign, `2` for daily, `3` for practice, or `4` for the notebook. Press `D` to cycle difficulty.
+- On the title screen, press `1` for campaign, `2` for daily, `3` for practice, `4` for the notebook, or `5` for Learn. Press `D` to cycle difficulty.
+- In Learn, scroll with the mouse wheel or arrow/Page Up/Page Down keys. Home and End jump to the beginning and end.
 - On the evidence desk, click each record or use left/right and Enter to review it.
 - During cross-examination and argument building, click an option or use `1`, `2`, or `3`; press Enter to continue after feedback.
 - In court, click an answer or press `1`, `2`, or `3`; use up/down to move the highlight. Press `H` for a doctrine hint outside Expert mode.
 - In practice and the notebook, use arrow keys to browse cases; Enter starts practice.
-- Press Escape to return to the title.
 - Press Escape to return to the title.
 - Use the Fullscreen button under the game in a browser.
 
@@ -55,6 +55,15 @@ The default cast is original procedural art drawn in LÖVE: layered box-shaped f
 See [ASSETS.md](ASSETS.md) for sources and licenses. Keep the relevant license and attribution with any replacement art.
 
 ## Learning note
+
+The Learn page presents the Fourth Amendment's ratification, historical background, text, protections, and selected modern applications. Its pictures are original vector-like illustrations drawn in Lua; there are no memes, external image downloads, or runtime network requests.
+
+Primary and official references for the Learn page:
+
+- [National Archives: The Bill of Rights](https://www.archives.gov/milestone-documents/bill-of-rights) and [How did it happen?](https://www.archives.gov/founding-docs/bill-of-rights/how-did-it-happen) — amendment text, ratification date, and drafting history.
+- [United States v. Verdugo-Urquidez, 494 U.S. 259](https://tile.loc.gov/storage-services/service/ll/usrep/usrep494/usrep494259/usrep494259.pdf) — historical discussion of writs of assistance and general warrants.
+- [Congress.gov Constitution Annotated: The Fourth Amendment](https://constitution.congress.gov/browse/essay/intro-7-1/ALDE_00001302/) — incorporation and Fourth Amendment overview.
+- [Riley v. California](https://constitution.congress.gov/browse/essay/amdt4-3-4/ALDE_00013718/) and [Carpenter v. United States](https://www.supremecourt.gov/opinions/17pdf/16-402_h315.pdf) — selected modern digital privacy decisions.
 
 The fictional cases draw on [*Georgia v. Randolph*](https://www.law.cornell.edu/supct/pdf/04-1067P.ZO) (shared-home consent), [*Riley v. California*](https://www.law.cornell.edu/supremecourt/text/13-132) (phone contents after arrest), [*Carpenter v. United States*](https://www.supremecourt.gov/opinions/17pdf/16-402_h315.pdf) (historical cell-site location data), [*Terry v. Ohio*](https://supreme.justia.com/cases/federal/us/392/1/) (stop and frisk), [*Payton v. New York*](https://www.govinfo.gov/app/details/USREPORTS-445/USREPORTS-445-573) (home entry to make an arrest), [*Rodriguez v. United States*](https://supreme.justia.com/cases/federal/us/575/348/) (traffic-stop duration), [*Carroll v. United States*](https://supreme.justia.com/cases/federal/us/267/132/) (vehicle searches on probable cause), [*Maryland v. Garrison*](https://supreme.justia.com/cases/federal/us/480/79/) (reasonable mistakes executing warrants), [*Arizona v. Gant*](https://www.govinfo.gov/app/details/USREPORTS-556/USREPORTS-556-332) (vehicle search incident to arrest), [*Florida v. Jimeno*](https://www.govinfo.gov/app/details/USREPORTS-500/USREPORTS-500-248) (consent scope), and [*Collins v. Virginia*](https://www.supremecourt.gov/opinions/17pdf/16-1027_7lio.pdf) (automobile exception and curtilage).
 

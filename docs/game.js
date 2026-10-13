@@ -90,7 +90,7 @@ Module.expectedDataFileDownloads++;
       function assert(check, msg) {
         if (!check) throw msg + new Error().stack;
       }
-      
+
 
       function DataRequest(start, end, crunched, audio) {
         this.start = start;
@@ -284,6 +284,6 @@ Module.expectedDataFileDownloads++;
     }
 
   }
-  loadPackage({"package_uuid":"10757abb-9f5d-4f40-964c-21bd655ff9e7","remote_package_size":2873813,"files":[{"filename":"/game.love","crunched":0,"start":0,"end":2873813,"audio":false}]});
+  loadPackage({"package_uuid":"7c471d5f-b49f-4708-8467-8914b3cec706","remote_package_size":2877196,"files":[{"filename":"/game.love","crunched":0,"start":0,"end":2877196,"audio":false}]});
 
 })();
