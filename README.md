@@ -48,7 +48,7 @@ This packages the editable Lua project and assets, then regenerates `docs/` for 
 
 ## Replace the artwork
 
-The default cast is original procedural art drawn in LÖVE: layered box-shaped faces, changing expressions, floating hands with no arms, and idle/blink/gesture animations. To override a portrait with your own PNG, add it under `lovegame/assets/characters/custom/` using the matching pose name (for example `counsel-neutral.png` or `witness-one-shocked.png`). Each pose is replaceable independently. Replace background photos under `lovegame/assets/` using their existing filenames. The browser build embeds local copies and does not hotlink artwork.
+The default cast is original procedural art drawn in LÖVE: layered box-shaped faces, changing expressions, floating hands with no arms, and idle/blink/gesture animations. Optional PNG overrides go under `lovegame/assets/characters/custom/` using the matching pose name (for example `counsel-neutral.png` or `witness-one-shocked.png`); when no override is present, the original box-figure art is used. Replace background photos under `lovegame/assets/` using their existing filenames. The browser build embeds local copies and does not hotlink artwork.
 
 See [ASSETS.md](ASSETS.md) for sources and licenses. Keep the relevant license and attribution with any replacement art.
 

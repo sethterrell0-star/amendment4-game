@@ -2,9 +2,9 @@
 
 All art is bundled locally and can be replaced. No external image request is made at runtime.
 
-## Character portraits
+## Characters
 
-The twelve replaceable portraits in `lovegame/assets/characters/` come from [Visual Novel Character Sprite](https://opengameart.org/content/visual-novel-character-sprite), by FALLiNG_AiR. The pack is dedicated under [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). Character poses cover the defense attorney, prosecutor, and two witnesses. Attribution is not required by CC0; it is included here as a courtesy. Keep each filename, or change its reference in `lovegame/main.lua`.
+The attorney, prosecutor, and witnesses are original box-figure graphics drawn in `lovegame/main.lua`. Faces, expressions, clothing, and detached hand gestures are assembled from LÖVE shapes; no portrait pack is bundled. Optional replacement PNGs can be added under `lovegame/assets/characters/custom/` with the pose names used by the game.
 
 ## Background photos
 
@@ -14,4 +14,4 @@ The twelve replaceable portraits in `lovegame/assets/characters/` come from [Vis
 | `lovegame/assets/courtroom.jpg` | [Interior view of the court room at the Old Courthouse](https://commons.wikimedia.org/wiki/File:Interior_view_of_the_court_room_at_the_Old_Courthouse.jpg), Missouri History Museum; original photograph circa 1900–1920 | Public domain in the United States |
 | `lovegame/assets/police-car.jpg` | [Police-car.jpg](https://commons.wikimedia.org/wiki/File:Police-car.jpg), PublicDomainPictures.net | CC0 1.0 Universal Public Domain Dedication |
 
-The photos are used as tinted scene backdrops. Replace a photo with another file using the same name and format, or update the references in `lovegame/main.lua`. The court portraits are independent transparent PNGs, so you can replace them with your own poses. Check the license for new art and update this file with the source.
+The photos are used as tinted scene backdrops. Replace a photo with another file using the same name and format, or update the references in `lovegame/main.lua`. Check the license for new art and update this file with the source.

@@ -64,7 +64,8 @@ local function loadArt()
     end
   end
   for _,n in ipairs(names) do
-    art[n]=loadImage({"assets/characters/custom/"..n..".png","assets/characters/"..n..".png"})
+    -- User PNG overrides are optional; the built-in box-figure cast is the default.
+    art[n]=loadImage({"assets/characters/custom/"..n..".png"})
   end
   for _,n in ipairs({"courthouse","courtroom","police-car"}) do
     photos[n]=loadImage({"assets/"..n..".jpg"})
@@ -300,8 +301,8 @@ local function drawCharacter(name,x,y,w,h,alpha)
   -- Lapel highlights provide a final foreground layer.
   if counsel or prosecutor then
     set({.78,.84,1},(alpha or 1)*.78)
-    polygon({cx-53*s,top+108*s,cx-30*s,top+132*s,cx-45*s,top+167*s})
-    polygon({cx+53*s,top+108*s,cx+30*s,top+132*s,cx+45*s,top+167*s})
+    polygon({cx-53*s,top+108*s,cx-30*s,top+132*s,cx-45*s,top+167*s},shade)
+    polygon({cx+53*s,top+108*s,cx+30*s,top+132*s,cx+45*s,top+167*s},shade)
   else
     set({1,.96,.80},(alpha or 1)*.22); love.graphics.rectangle("fill",cx-4*s,top+179*s,8*s,64*s)
   end
