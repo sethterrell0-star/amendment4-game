@@ -2,7 +2,7 @@
 
 A courtroom visual novel about the Fourth Amendment. Its 12 cases cover four rising difficulty bands, with four randomized courtroom questions per case. A full case now moves from an evidence desk through witness cross-examination and a four-link motion builder to a branching ruling. Some searches are lawful, so the defense must fit the facts to the doctrine instead of arguing suppression every time.
 
-Choose a full campaign, a date-seeded daily docket, single-case practice, or the doctrine notebook. Study mode shows free hints, Standard deducts a point when a used hint leads to a correct answer, and Expert disables hints. Case order is shuffled inside each difficulty band; questions and answer positions are shuffled each run. The daily docket uses the UTC date as its seed, so players get the same shuffle that day.
+Choose a full campaign, a date-seeded daily docket, single-case practice, or the doctrine notebook. Study mode shows free hints, Standard deducts a point when a used hint leads to a correct answer, and Expert disables hints. Case order is shuffled inside each difficulty band; questions and answer positions are shuffled each run, with answer 1 used only once per four-question case. The daily docket uses the UTC date as its seed, so players get the same shuffle that day.
 
 The game is written in **LÖVE 11.4 / Lua**. It also ships as a static browser build using love.js and WebAssembly. No server-side code or external services are needed; the browser loads the bundled game files from the same site.
 

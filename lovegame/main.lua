@@ -16,6 +16,7 @@ local argumentStep, argumentScore, argumentAnswered, argumentChoice = 1, 0, fals
 local argumentMessage = ""
 local animTime = 0
 local learnScroll = 0
+local learnDragging = false
 local scale, ox, oy = 1, 0, 0
 local musicSource, musicEnabled = nil, true
 local DIFFICULTY_NAMES = {"STUDY", "STANDARD", "EXPERT"}
@@ -90,12 +91,16 @@ local function loadArt()
   end
 end
 local function loadFonts()
-  fonts.tiny=love.graphics.newFont(13); fonts.small=love.graphics.newFont(17); fonts.body=love.graphics.newFont(20)
-  fonts.choice=love.graphics.newFont(16); fonts.mid=love.graphics.newFont(26); fonts.head=love.graphics.newFont(38); fonts.big=love.graphics.newFont(62); fonts.huge=love.graphics.newFont(84)
+  local path="assets/fonts/NotoSans-Regular.ttf"
+  fonts.tiny=love.graphics.newFont(path,13); fonts.small=love.graphics.newFont(path,17); fonts.body=love.graphics.newFont(path,20)
+  fonts.choice=love.graphics.newFont(path,16); fonts.mid=love.graphics.newFont(path,26); fonts.head=love.graphics.newFont(path,38); fonts.big=love.graphics.newFont(path,62); fonts.huge=love.graphics.newFont(path,84)
 end
 local function shuffleList(items)
   for i=#items,2,-1 do local j=love.math.random(i); items[i],items[j]=items[j],items[i] end
   return items
+end
+local function seedRandomRun()
+  love.math.setRandomSeed(os.time(),math.floor(love.timer.getTime()*1000000))
 end
 local function buildDocket()
   caseOrder={}
@@ -109,19 +114,40 @@ local function buildDocket()
 end
 local function buildQuestionDeck(case)
   questionDeck={}
-  for _,source in ipairs(case.questions) do
-    local question={prompt=source.prompt,choices={},correct=0}
-    local optionOrder={1,2,3}; shuffleList(optionOrder)
-    for slot,sourceIndex in ipairs(optionOrder) do
-      question.choices[slot]=source.choices[sourceIndex]
-      if sourceIndex==source.correct then question.correct=slot end
+  -- Each four-question case gets one correct answer in slot 1 and the rest
+  -- spread across slots 2 and 3. Shuffle the pattern so no slot sequence sticks.
+  local answerSlots={}
+  while #answerSlots<#case.questions do
+    local pack={1,2,2,3}
+    local valid=false
+    while not valid do
+      shuffleList(pack); valid=true
+      for i=2,#pack do if pack[i]==pack[i-1] then valid=false; break end end
     end
+    for _,slot in ipairs(pack) do
+      if #answerSlots<#case.questions then answerSlots[#answerSlots+1]=slot end
+    end
+  end
+  for sourceIndex,source in ipairs(case.questions) do
+    local question={prompt=source.prompt,choices={},correct=0}
+    local correctSlot=answerSlots[sourceIndex]
+    local distractors={}
+    for choiceIndex,choice in ipairs(source.choices) do
+      if choiceIndex~=source.correct then distractors[#distractors+1]=choice end
+    end
+    shuffleList(distractors)
+    local distractorIndex=1
+    for slot=1,#source.choices do
+      if slot==correctSlot then question.choices[slot]=source.choices[source.correct]
+      else question.choices[slot]=distractors[distractorIndex]; distractorIndex=distractorIndex+1 end
+    end
+    question.correct=correctSlot
     questionDeck[#questionDeck+1]=question
   end
   shuffleList(questionDeck)
 end
 local function beginGame()
-  runMode="campaign"; love.math.setRandomSeed(os.time())
+  runMode="campaign"; seedRandomRun()
   buildDocket(); casePos=1; stagePos=1; score=0; caseCorrect=0; crossCorrect=false
   runMaxScore=#caseOrder*5; current=CASES[caseOrder[casePos]]; screen="intro"
 end
@@ -135,7 +161,7 @@ local function beginDaily()
   runMaxScore=#caseOrder*5; current=CASES[caseOrder[casePos]]; screen="intro"
 end
 local function beginPractice(index)
-  runMode="practice"; love.math.setRandomSeed(os.time())
+  runMode="practice"; seedRandomRun()
   practiceIndex=index; caseOrder={index}; casePos=1; stagePos=1; score=0; caseCorrect=0; crossCorrect=false
   runMaxScore=#CASES[index].questions+1; current=CASES[index]; screen="intro"
 end
@@ -459,7 +485,7 @@ local function drawLearn()
   local thumbY=LEARN_VIEW_Y+(LEARN_VIEW_H-thumbH)*(learnScroll/LEARN_MAX_SCROLL)
   rounded(1186,thumbY,8,thumbH,4,colors.gold)
   divider(94,615,1092)
-  text("SCROLL OR USE ↑ / ↓  ·  PAGE UP / PAGE DOWN  ·  HOME / END",98,630,fonts.tiny,colors.blue)
+  text("SCROLL OR USE UP / DOWN  ·  PAGE UP / PAGE DOWN  ·  HOME / END",98,630,fonts.tiny,colors.blue)
   rounded(1040,622,138,30,6,colors.navy)
   text("BACK  ·  ESC",1040,629,fonts.tiny,colors.gold,"center",138)
 end
@@ -505,7 +531,7 @@ local function drawIntro()
   text(current.item,330,469,fonts.mid,colors.ink,"left",830)
   text(difficultyMode==3 and "EXPERT MODE  /  DOCTRINE NOTES HIDDEN" or current.doctrine,330,519,fonts.tiny,colors.blue,"left",835)
   rounded(920,562,275,43,7,colors.navy)
-  text("OPEN EVIDENCE DESK  →",932,575,fonts.tiny,colors.gold,"center",250)
+  text("OPEN EVIDENCE DESK  >",932,575,fonts.tiny,colors.gold,"center",250)
   text("ENTER OR CLICK  ·  REVIEW THE RECORD",18,674,fonts.tiny,colors.muted)
 end
 
@@ -520,7 +546,7 @@ local function drawInvestigation()
     local fill=evidenceTab==i and colors.navy or {.90,.89,.84}
     rounded(x,207,322,54,7,fill)
     rounded(x,207,5,54,2,evidenceViewed[i] and colors.green or (evidenceTab==i and colors.gold or {.72,.69,.62}))
-    text((evidenceViewed[i] and "✓  " or string.format("%02d  ",i))..label,x+16,224,fonts.tiny,evidenceTab==i and colors.cream or colors.ink,"center",294)
+    text((evidenceViewed[i] and "DONE  " or string.format("%02d  ",i))..label,x+16,224,fonts.tiny,evidenceTab==i and colors.cream or colors.ink,"center",294)
   end
   local labels={"OFFICIAL CASE FILE","PROPERTY / RECORD REVIEW","CONTROLLING PRECEDENT"}
   panel(114,280,1020,265,10,{.925,.92,.86},{.82,.78,.68})
@@ -528,12 +554,12 @@ local function drawInvestigation()
   text(labels[evidenceTab],144,302,fonts.tiny,colors.red)
   divider(144,330,950)
   text(evidenceText(evidenceTab),144,352,fonts.body,colors.ink,"left",948)
-  rounded(114,576,220,41,6,{.88,.86,.80}); text("←  PREVIOUS FILE",114,589,fonts.tiny,colors.navy,"center",220)
-  rounded(348,576,220,41,6,{.88,.86,.80}); text("NEXT FILE  →",348,589,fonts.tiny,colors.navy,"center",220)
+  rounded(114,576,220,41,6,{.88,.86,.80}); text("<  PREVIOUS FILE",114,589,fonts.tiny,colors.navy,"center",220)
+  rounded(348,576,220,41,6,{.88,.86,.80}); text("NEXT FILE  >",348,589,fonts.tiny,colors.navy,"center",220)
   local ready=evidenceViewed[1] and evidenceViewed[2] and evidenceViewed[3]
   rounded(847,576,287,41,6,ready and colors.green or {.75,.75,.71})
-  text(ready and "CALL THE WITNESS  →" or "REVIEW ALL THREE FILES",847,589,fonts.tiny,colors.white,"center",287)
-  center("← / → change file   ·   Enter marks it reviewed",628,fonts.tiny,colors.blue)
+  text(ready and "CALL THE WITNESS  >" or "REVIEW ALL THREE FILES",847,589,fonts.tiny,colors.white,"center",287)
+  center("< / > change file   ·   Enter marks it reviewed",628,fonts.tiny,colors.blue)
 end
 
 local function drawCross()
@@ -559,7 +585,7 @@ local function drawCross()
   end
   if crossAnswered then
     text(crossFeedback,359,560,fonts.tiny,crossCorrect and colors.green or colors.red,"left",805)
-    rounded(901,626,271,48,9,colors.gold); text("BUILD YOUR ARGUMENT  →",901,639,fonts.tiny,colors.navy,"center",271)
+    rounded(901,626,271,48,9,colors.gold); text("BUILD YOUR ARGUMENT  >",901,639,fonts.tiny,colors.navy,"center",271)
   else text("Select the strongest exhibit, then Enter",359,578,fonts.tiny,colors.blue) end
 end
 
@@ -604,7 +630,7 @@ local function drawArgument()
     rounded(154,yy,970,61,7,c); rounded(169,yy+13,34,34,5,colors.navy); text(i,169,yy+21,fonts.tiny,colors.gold,"center",34); text(label,221,yy+17,fonts.small,colors.ink,"left",885)
   end
   if argumentAnswered then text(argumentMessage,158,511,fonts.tiny,argumentChoice==argumentCorrectChoice() and colors.green or colors.red,"left",940) end
-  rounded(880,553,244,43,9,colors.gold); text(argumentAnswered and "NEXT LINK  →" or "LOCK IN LINK  →",880,565,fonts.tiny,colors.navy,"center",244)
+  rounded(880,553,244,43,9,colors.gold); text(argumentAnswered and "NEXT LINK  >" or "LOCK IN LINK  >",880,565,fonts.tiny,colors.navy,"center",244)
   center("1–3 choose • Enter confirms / advances",587,fonts.tiny,colors.blue)
 end
 
@@ -621,7 +647,7 @@ local function drawPractice()
     text(c.title,x+59,y+11,fonts.tiny,colors.ink,"left",248)
     text(DIFFICULTIES[c.tier].."  ·  "..c.tag,x+59,y+43,fonts.tiny,colors.blue,"left",248)
   end
-  rounded(472,564,336,48,9,colors.gold); text("START SELECTED CASE  →",472,578,fonts.small,colors.navy,"center",336)
+  rounded(472,564,336,48,9,colors.gold); text("START SELECTED CASE  >",472,578,fonts.small,colors.navy,"center",336)
   center("Arrow keys choose • Enter begins • Esc returns",622,fonts.tiny,colors.blue)
 end
 
@@ -650,7 +676,7 @@ local function drawNotebook()
   text("PRACTICE RULING",496,491,fonts.tiny,colors.red)
   text(c.outcome,496,516,fonts.tiny,colors.ink,"left",654)
   rounded(942,590,235,43,6,colors.navy); text("PRACTICE THIS CASE",952,603,fonts.tiny,colors.gold,"center",215)
-  text("↑ / ↓ browse • Enter practices",95,615,fonts.tiny,colors.blue)
+  text("UP / DOWN browse • Enter practices",95,615,fonts.tiny,colors.blue)
 end
 local function promptLineCount()
   local stage=questionDeck[stagePos]
@@ -699,7 +725,7 @@ local function drawCourt()
     rounded(108,642,1065,53,7,feedbackGood and colors.green or colors.red)
     local label=(feedbackGood and "OBJECTION SUSTAINED!  " or "OBJECTION OVERRULED.  ")..feedback
     text(label,126,650,fonts.tiny,colors.white,"left",1030)
-    rounded(1080,17,166,43,8,colors.gold); text(stagePos==#questionDeck and "SEE RULING →" or "CONTINUE →",1080,28,fonts.tiny,colors.navy,"center",166)
+    rounded(1080,17,166,43,8,colors.gold); text(stagePos==#questionDeck and "SEE RULING >" or "CONTINUE >",1080,28,fonts.tiny,colors.navy,"center",166)
   else
     text(difficultyMode==3 and "Expert: hints disabled" or "Choose a response  •  H shows doctrine hint",101,667,fonts.tiny,colors.muted)
   end
@@ -730,7 +756,7 @@ local function drawRuling()
   end
   text(ruling,390,435,fonts.body,colors.ink,"left",740)
   text("PRECEDENT  ·  "..current.doctrine,390,560,fonts.tiny,colors.blue,"left",740)
-  rounded(657,648,250,48,7,colors.navy); text(casePos==#caseOrder and "FINAL SCORE  →" or "NEXT CASE  →",671,661,fonts.tiny,colors.gold,"center",222)
+  rounded(657,648,250,48,7,colors.navy); text(casePos==#caseOrder and "FINAL SCORE  >" or "NEXT CASE  >",671,661,fonts.tiny,colors.gold,"center",222)
 end
 local function drawResults()
   drawBackdrop("intro"); drawCharacter("counsel-shout",28,100,442,594,.92); drawCharacter("prosecutor-surprised",810,91,420,600,.9)
@@ -852,6 +878,11 @@ function love.mousepressed(mx,my,button)
     if x>=500 and x<=780 and y>=572 and y<=607 then difficultyMode=difficultyMode%3+1 end
   elseif screen=="learn" then
     if x>=1040 and x<=1178 and y>=622 and y<=652 then screen="title"
+    elseif x>=1178 and x<=1204 and y>=LEARN_VIEW_Y and y<=LEARN_VIEW_Y+LEARN_VIEW_H then
+      learnDragging=true
+      local thumbH=math.max(48,LEARN_VIEW_H*LEARN_VIEW_H/(1498-LEARN_VIEW_Y))
+      local trackRange=LEARN_VIEW_H-thumbH
+      learnScroll=math.max(0,math.min(1,(y-LEARN_VIEW_Y-thumbH/2)/trackRange))*LEARN_MAX_SCROLL
     elseif x>=92 and x<=1180 and y>=LEARN_VIEW_Y and y<=LEARN_VIEW_Y+LEARN_VIEW_H then
       if y<LEARN_VIEW_Y+36 then learnScroll=math.max(0,learnScroll-120)
       elseif y>LEARN_VIEW_Y+LEARN_VIEW_H-36 then learnScroll=math.min(LEARN_MAX_SCROLL,learnScroll+120) end
@@ -885,6 +916,20 @@ function love.mousepressed(mx,my,button)
     else for i=1,3 do local ax,ay,aw,ah=answerRect(i); if x>=ax and x<=ax+aw and y>=ay and y<=ay+ah then finishAnswer(i); return end end end
   end
 end
+function love.mousemoved(mx,my)
+  if screen=="learn" and learnDragging then
+    local y=(my-oy)/scale
+    local thumbH=math.max(48,LEARN_VIEW_H*LEARN_VIEW_H/(1498-LEARN_VIEW_Y))
+    local trackRange=LEARN_VIEW_H-thumbH
+    learnScroll=math.max(0,math.min(1,(y-LEARN_VIEW_Y-thumbH/2)/trackRange))*LEARN_MAX_SCROLL
+  end
+end
+function love.mousereleased(_,_,button)
+  if button==1 then learnDragging=false end
+end
 function love.wheelmoved(_,y)
-  if screen=="learn" then learnScroll=math.max(0,math.min(LEARN_MAX_SCROLL,learnScroll-y*84)) end
+  if screen=="learn" then
+    local steps=math.max(-3,math.min(3,y))
+    learnScroll=math.max(0,math.min(LEARN_MAX_SCROLL,learnScroll-steps*84))
+  end
 end

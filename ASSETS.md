@@ -15,3 +15,7 @@ The attorney, prosecutor, and witnesses are original box-figure graphics drawn i
 | `lovegame/assets/police-car.jpg` | [Police-car.jpg](https://commons.wikimedia.org/wiki/File:Police-car.jpg), PublicDomainPictures.net | CC0 1.0 Universal Public Domain Dedication |
 
 The photos are used as tinted scene backdrops. Replace a photo with another file using the same name and format, or update the references in `lovegame/main.lua`. Check the license for new art and update this file with the source.
+
+## Typeface
+
+`lovegame/assets/fonts/NotoSans-Regular.ttf` uses the Noto Sans font by The Noto Project Authors under the SIL Open Font License, Version 1.1. The license is included beside the font in `lovegame/assets/fonts/OFL.txt`. Noto Sans is bundled so punctuation and extended characters render consistently in the browser and native LÖVE builds.
